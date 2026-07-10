@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Delivery Register - MedHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6; /* blue */
+            --primary-dark: #1e40af;
+            --accent-color: #60a5fa;
+            --mauve-light: #dbeafe;
+            --mauve-dark: #2563eb;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --background-primary: #ffffff;
+            --border-color: #e2e8f0;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --shadow-light: 0 2px 10px rgba(59, 130, 246, 0.15);
+            --shadow-medium: 0 4px 20px rgba(59, 130, 246, 0.2);
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 30%, #e0f2fe 70%, #f8fafc 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: 
+                radial-gradient(circle at 25% 75%, rgba(96,165,250,0.25) 0%, transparent 45%),
+                radial-gradient(circle at 75% 25%, rgba(59,130,246,0.25) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(219,234,254,0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 20px 25px -5px rgba(59,130,246,0.15),
+                0 10px 10px -5px rgba(96,165,250,0.1),
+                0 0 0 1px rgba(255,255,255,0.6);
+            border: 1px solid rgba(219,234,254,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--mauve-dark));
+            border-radius: 24px 24px 0 0;
+        }
+
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(59,130,246,0.3));
+        }
+
+        .auth-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #2563eb, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 1px 2px rgba(59,130,246,0.2));
+        }
+
+        .auth-header p { color: var(--text-secondary); font-size:1rem; margin-bottom:1rem; }
+
+        .role-selection { margin-bottom: 2rem; }
+        .role-selection h3 { text-align:center; color: var(--text-primary); font-size:1.1rem; font-weight:600; margin-bottom:1rem; }
+        .role-cards { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom:1.5rem; }
+
+        .role-card {
+            background: var(--background-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .role-card:hover { border-color: var(--primary-color); transform:translateY(-2px); box-shadow: var(--shadow-medium); }
+        .role-card.selected { border-color: var(--primary-color); background: linear-gradient(135deg, rgba(59,130,246,0.05), rgba(96,165,250,0.05)); box-shadow: var(--shadow-light); }
+
+        .role-icon { font-size:2.5rem; min-width:60px; text-align:center; }
+        .role-content { flex:1; }
+        .role-title { font-size:1.1rem; font-weight:600; color: var(--text-primary); margin-bottom:0.25rem; }
+        .role-description { font-size:0.9rem; color: var(--text-secondary); line-height:1.4; }
+        .role-check { width:24px; height:24px; border:2px solid var(--border-color); border-radius:50%; position: relative; transition: var(--transition); }
+        .role-card.selected .role-check { border-color: var(--primary-color); background: var(--primary-color); }
+        .role-card.selected .role-check::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:0.8rem; font-weight:bold; }
+
+        .form-group { margin-bottom:1.5rem; }
+        label { display:block; font-weight:600; color: var(--text-primary); margin-bottom:0.5rem; font-size:0.95rem; }
+        input, select {
+            width:100%; padding:1rem 1.2rem; border:2px solid var(--border-color); border-radius:var(--border-radius-md);
+            font-size:1rem; font-family:inherit; background:var(--background-primary); color: var(--text-primary); transition: var(--transition); outline:none;
+        }
+        input:focus, select:focus { border-color: var(--primary-color); box-shadow:0 0 0 3px rgba(59,130,246,0.15); transform:translateY(-1px); }
+        input::placeholder { color:#a0a0a0; }
+
+        .conditional-fields { display:none; opacity:0; transition: opacity 0.3s ease; }
+        .conditional-fields.show { display:block; opacity:1; }
+
+        .field-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+        .btn {
+            width:100%; padding:1.1rem 2rem; font-size:1.1rem; font-weight:600;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color:white; border:none;
+            border-radius:var(--border-radius-md); cursor:pointer; transition: var(--transition); display:flex; align-items:center; justify-content:center; gap:0.5rem; margin-bottom:1rem; position:relative; overflow:hidden;
+        }
+
+        .btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+        .btn:hover::before { left:100%; }
+        .btn:hover { transform:translateY(-2px); box-shadow:0 10px 20px rgba(59,130,246,0.4); }
+        .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+        .btn-loader { display:none; width:20px; height:20px; border:2px solid rgba(255,255,255,0.3); border-top:2px solid white; border-radius:50%; animation:spin 1s linear infinite; }
+        .btn.loading .btn-loader { display:block; }
+        .btn.loading .btn-text { display:none; }
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+        .error-message, .success-message {
+            padding:0.875rem 1rem; border-radius:var(--border-radius-md); margin-bottom:1rem; display:none; font-size:0.9rem; font-weight:500;
+        }
+        .error-message { background: rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color: var(--error-color); }
+        .success-message { background: rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color: var(--success-color); }
+
+        .checkbox-group { display:flex; align-items:flex-start; gap:0.75rem; margin-bottom:1.5rem; }
+        .checkbox-group input[type="checkbox"] { width:auto; margin:0; transform:scale(1.2); accent-color: var(--primary-color); }
+        .checkbox-group label { font-weight:400; font-size:0.9rem; margin:0; line-height:1.4; }
+        .checkbox-group a { color: var(--primary-color); text-decoration:none; }
+        .checkbox-group a:hover { color: var(--accent-color); text-decoration:underline; }
+
+        .auth-footer { text-align:center; padding-top:1.5rem; border-top:1px solid var(--border-color); }
+        .auth-footer p { color: var(--text-secondary); margin-bottom:1rem; }
+        .auth-footer a { color: var(--primary-color); text-decoration:none; font-weight:600; transition: color 0.3s ease; position:relative; }
+        .auth-footer a:hover { color: var(--accent-color); }
+        .auth-footer a::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px; background:linear-gradient(90deg, var(--primary-color), var(--accent-color)); transition: width 0.3s ease; }
+        .auth-footer a:hover::after { width:100%; }
+
+        .back-link { text-align:center; margin-bottom:1.5rem; }
+        .back-link a { color: var(--text-secondary); text-decoration:none; font-size:0.9rem; transition: color 0.3s ease; display:inline-flex; align-items:center; gap:0.5rem; }
+        .back-link a:hover { color: var(--primary-color); }
+
+        @media(max-width:480px){
+            .auth-container{padding:2rem 1.5rem;}
+            .auth-header h1{font-size:1.8rem;}
+            .field-row{grid-template-columns:1fr; gap:0;}
+            .role-card{padding:1rem;}
+            .role-icon{font-size:2rem; min-width:50px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="back-link">
+            <a href="/medicine/login">← Back to Login</a>
+        </div>
+        <div class="auth-header">
+            <span class="service-icon">💊</span>
+            <h1>Join Medicine Delivery</h1>
+            <p>Create your account for medicine delivery services</p>
+        </div>
+
+        <div class="role-selection">
+            <h3>Choose Your Role</h3>
+            <div class="role-cards">
+                <div class="role-card" data-role="customer">
+                    <div class="role-icon">🛒</div>
+                    <div class="role-content">
+                        <div class="role-title">Customer</div>
+                        <div class="role-description">Order medicines from nearby pharmacies</div>
+                    </div>
+                    <div class="role-check"></div>
+                </div>
+                <div class="role-card" data-role="pharmacy">
+                    <div class="role-icon">🏥</div>
+                    <div class="role-content">
+                        <div class="role-title">Pharmacy Owner</div>
+                        <div class="role-description">Manage your pharmacy and stock</div>
+                    </div>
+                    <div class="role-check"></div>
+                </div>
+                <div class="role-card" data-role="delivery">
+                    <div class="role-icon">🚀</div>
+                    <div class="role-content">
+                        <div class="role-title">Delivery Partner</div>
+                        <div class="role-description">Earn by delivering medicines to customers</div>
+                    </div>
+                    <div class="role-check"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="registerForm">
+            <input type="hidden" id="role" name="role" value="">
+
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+            </div>
+
+            <!-- Pharmacy-specific fields -->
+            <div class="conditional-fields" id="pharmacyFields">
+                <div class="form-group">
+                    <label for="pharmacy_name">Pharmacy Name</label>
+                    <input type="text" id="pharmacy_name" name="pharmacy_name" placeholder="Enter your pharmacy name">
+                </div>
+                <div class="form-group">
+                    <label for="license_number">Pharmacy License Number</label>
+                    <input type="text" id="license_number" name="license_number" placeholder="Enter license number">
+                </div>
+            </div>
+
+            <!-- Delivery-specific fields -->
+            <div class="conditional-fields" id="deliveryFields">
+                <div class="field-row">
+                    <div class="form-group">
+                        <label for="vehicle_type">Vehicle Type</label>
+                        <select id="vehicle_type" name="vehicle_type">
+                            <option value="">Select vehicle</option>
+                            <option value="bike">Motorcycle</option>
+                            <option value="bicycle">Bicycle</option>
+                            <option value="car">Car</option>
+                            <option value="scooter">Scooter</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="driver_license">Driver License Number</label>
+                        <input type="text" id="driver_license" name="driver_license" placeholder="Enter license number">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address" placeholder="Enter your complete address" required>
+            </div>
+
+            <div class="field-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city" placeholder="Enter city" required>
+                </div>
+                <div class="form-group">
+                    <label for="pincode">PIN Code</label>
+                    <input type="text" id="pincode" name="pincode" placeholder="Enter PIN code" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password (minimum 8 characters)" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" required>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></label>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="marketing" name="marketing">
+                <label for="marketing">I want to receive promotional emails and updates</label>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                <div class="btn-loader"></div>
+                <span class="btn-text">Create Account</span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account?</p>
+            <a href="/medicine/login">Sign In Here</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const roleCards = document.querySelectorAll('.role-card');
+        const roleInput = document.getElementById('role');
+        const pharmacyFields = document.getElementById('pharmacyFields');
+        const deliveryFields = document.getElementById('deliveryFields');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        roleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                roleCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                const role = this.dataset.role;
+                roleInput.value = role;
+
+                pharmacyFields.classList.remove('show');
+                deliveryFields.classList.remove('show');
+
+                if(role === 'pharmacy'){
+                    setTimeout(()=>{
+                        pharmacyFields.classList.add('show');
+                        document.getElementById('pharmacy_name').required = true;
+                        document.getElementById('license_number').required = true;
+                    }, 100);
+                } else if(role === 'delivery'){
+                    setTimeout(()=>{
+                        deliveryFields.classList.add('show');
+                        document.getElementById('vehicle_type').required = true;
+                        document.getElementById('driver_license').required = true;
+                    }, 100);
+                }
+
+                if(role !== 'pharmacy'){
+                    document.getElementById('pharmacy_name').required = false;
+                    document.getElementById('license_number').required = false;
+                }
+                if(role !== 'delivery'){
+                    document.getElementById('vehicle_type').required = false;
+                    document.getElementById('driver_license').required = false;
+                }
+            });
+        });
+
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            if(validateForm()) submitForm();
+        });
+
+        function validateForm(){
+            hideMessages();
+            if(!roleInput.value){ showError('Please select your role'); return false; }
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const pincode = document.getElementById('pincode').value;
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailPattern.test(email)){ showError('Please enter a valid email'); return false; }
+
+            const phonePattern = /^[6-9]\d{9}$/;
+            if(!phonePattern.test(phone.replace(/\D/g,''))){ showError('Please enter valid 10-digit phone'); return false; }
+
+            const pincodePattern = /^\d{6}$/;
+            if(!pincodePattern.test(pincode)){ showError('Please enter a valid 6-digit PIN code'); return false; }
+
+            if(password.length<8){ showError('Password must be at least 8 characters'); return false; }
+            if(password !== confirmPassword){ showError('Passwords do not match'); return false; }
+
+            return true;
+        }
+
+        function submitForm(){
+            submitBtn.classList.add('loading'); submitBtn.disabled = true;
+            const formData = new FormData(form);
+            const userData = Object.fromEntries(formData);
+
+            fetch('/medicine/register',{
+                method:'POST',
+                headers:{ 'Content-Type':'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(res => res.json())
+            .then(data=>{
+                submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+                if(data.success){
+                    showSuccess(data.message||'Registration successful! Redirecting...');
+                    setTimeout(()=>window.location.href='/medicine/login', 2000);
+                } else {
+                    if(data.redirect){
+                        showError(data.message); setTimeout(()=>window.location.href='/medicine/login',2000);
+                    } else showError(data.message||'Registration failed. Please try again.');
+                }
+            })
+            .catch(err=>{
+                submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+                showError('Registration failed. Please try again.');
+                console.error('Error:', err);
+            });
+        }
+
+        function showError(msg){ errorMessage.textContent=msg; errorMessage.style.display='block'; errorMessage.scrollIntoView({behavior:'smooth', block:'nearest'});}
+        function showSuccess(msg){ successMessage.textContent=msg; successMessage.style.display='block'; successMessage.scrollIntoView({behavior:'smooth', block:'nearest'});}
+        function hideMessages(){ errorMessage.style.display='none'; successMessage.style.display='none';}
+
+        document.getElementById('pincode').addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,6);});
+        document.getElementById('phone').addEventListener('input', function(){ let v=this.value.replace(/\D/g,''); this.value=v.slice(0,10); });
+        document.querySelectorAll('input,select').forEach(inp=>{ inp.addEventListener('input',function(){ this.style.borderColor=this.value.length>0?'var(--primary-color)':'var(--border-color)'; }); });
+    </script>
+</body>
+</html>

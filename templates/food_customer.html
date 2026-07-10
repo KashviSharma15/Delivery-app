@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - DeliveryHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .location-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .location-box {
+            background: white;
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .location-icon {
+            font-size: 100px;
+            margin-bottom: 25px;
+        }
+
+        .location-box h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1c1c1c;
+        }
+
+        .location-box p {
+            color: #666;
+            margin-bottom: 35px;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .location-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 15px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .location-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .location-btn.secondary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+        }
+
+        .manual-entry {
+            display: none;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .manual-entry.show {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .divider {
+            margin: 20px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            z-index: 900;
+        }
+
+        .chat-fab:hover {
+            transform: scale(1.1);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #8b4513;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .restaurant-icon { background: #e8f5e8; }
+        .cart-icon { background: #fff3e0; }
+        .orders-icon { background: #f3e5f5; }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff6b35;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .main-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .refresh-btn {
+            background: #6c7ae0;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .restaurant-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .restaurant-card:hover {
+            border-color: #ff6b35;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .restaurant-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .restaurant-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .restaurant-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .restaurant-info .cuisine {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .restaurant-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .distance-badge {
+            background: #e8f5e8;
+            color: #2ecc71;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .items-preview {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .cart-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        /* Order Tracking Styles */
+        .orders-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .order-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .order-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-Placed { background: #fff3cd; color: #856404; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-Preparing { background: #cfe2ff; color: #084298; }
+        .status-preparing { background: #cfe2ff; color: #084298; }
+        .status-Ready { background: #d1e7dd; color: #0f5132; }
+        .status-ready { background: #d1e7dd; color: #0f5132; }
+        .status-delivering { background: #e7d4f5; color: #6f42c1; }
+        .status-picked_up { background: #e7d4f5; color: #6f42c1; }
+        .status-completed { background: #d1e7dd; color: #0f5132; }
+
+        .order-details {
+            margin-bottom: 15px;
+        }
+
+        .order-restaurant {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin-bottom: 8px;
+        }
+
+        .order-items {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .order-delivery-info {
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .order-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .order-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .status-timeline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .timeline-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: #ddd;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+        }
+
+        .timeline-step.active .timeline-dot {
+            background: #667eea;
+        }
+
+        .timeline-step.completed .timeline-dot {
+            background: #2ecc71;
+        }
+
+        .timeline-label {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .timeline-step.active .timeline-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 15px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #ff6b35;
+            font-size: 16px;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .qty-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .cart-items {
+            margin-top: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-total {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .checkout-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .chat-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1500;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75vh;
+            background: white;
+            border-radius: 25px 25px 0 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 25px 25px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .chat-info-text h3 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .chat-close {
+            background: rgba(255,255,255,0.25);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px 20px;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .chat-message.received .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .chat-message.sent .message-avatar {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .message-content {
+            max-width: 75%;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .chat-message.received .message-bubble {
+            background: white;
+            color: #1f2937;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-message.sent .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 6px;
+            padding: 0 5px;
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 3px;
+        }
+
+        .ai-badge::before {
+            content: '✨';
+        }
+
+        .quick-replies {
+            padding: 10px 20px 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .quick-reply-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="location-prompt" id="locationPrompt">
+        <div class="location-box">
+            <div class="location-icon">📍</div>
+            <h2>Enable Location Access</h2>
+            <p>We need your location to show nearby restaurants within 20km radius.</p>
+            <button class="location-btn" onclick="requestLocation()">📍 Auto-Detect Location</button>
+            <div class="divider">OR</div>
+            <button class="location-btn secondary" onclick="showManualEntry()">📝 Enter Manually</button>
+            <div class="manual-entry" id="manualEntry">
+                <div class="input-group">
+                    <label>Latitude</label>
+                    <input type="number" id="manualLat" placeholder="e.g., 10.020" step="any">
+                </div>
+                <div class="input-group">
+                    <label>Longitude</label>
+                    <input type="number" id="manualLng" placeholder="e.g., 9.020" step="any">
+                </div>
+                <button class="location-btn" onclick="setManualLocation()">✓ Use This Location</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-fab" id="chatFab" onclick="openChat()">💬</div>
+
+    <div class="header">
+        <div class="logo">🍽️ DeliveryHub</div>
+        <div class="user-info">
+            Welcome, <strong id="username">Customer!</strong>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon restaurant-icon">🏪</div>
+            <div class="stat-content">
+                <div class="stat-number" id="restaurantCount">0</div>
+                <div class="stat-label">Nearby Restaurants (20km)</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon cart-icon">🛒</div>
+            <div class="stat-content">
+                <div class="stat-number" id="cartCount">0</div>
+                <div class="stat-label">Items in Cart</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orders-icon">📦</div>
+            <div class="stat-content">
+                <div class="stat-number" id="orderCount">0</div>
+                <div class="stat-label">My Orders</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section - NEW! -->
+    <div class="orders-section" id="ordersSection" style="display:none;">
+        <div class="section-header">
+            <div class="section-title">📦 My Orders</div>
+            <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh</button>
+        </div>
+        <div id="ordersContainer"></div>
+    </div>
+
+    <div class="main-section">
+        <div class="section-header">
+            <div class="section-title">🏪 Nearby Restaurants</div>
+            <button class="refresh-btn" onclick="loadRestaurants()">🔄 Refresh</button>
+        </div>
+        <div id="restaurantsContainer" class="restaurants-grid">
+            <div style="grid-column: 1 / -1;">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    <h3>Enable location to see restaurants</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-section">
+        <div class="section-title">🛒 Your Cart</div>
+        <div id="cartContainer">
+            <div class="empty-state">
+                <div class="empty-state-icon">🛒</div>
+                <h3>Your cart is empty</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalRestaurantName">Restaurant</h2>
+                    <p id="modalCuisineType">Cuisine</p>
+                </div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="menuItems"></div>
+        </div>
+    </div>
+
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-window">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-info-text">
+                        <h3>AI Assistant</h3>
+                        <p>Always here to help</p>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="closeChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message received">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            Hello! I can help you with:<br><br>
+                            🏪 Finding restaurants<br>
+                            📦 Tracking orders<br>
+                            🍕 Food recommendations<br>
+                            ⏱️ Delivery times
+                        </div>
+                        <div class="message-time">Just now</div>
+                        <span class="ai-badge">AI Powered</span>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-replies">
+                <button class="quick-reply-btn" onclick="sendQuickReply('Show nearby restaurants')">🏪 Nearby</button>
+                <button class="quick-reply-btn" onclick="sendQuickReply('Track my order')">📦 Track</button>
+                <button class="quick-reply-btn" onclick="sendQuickReply('Delivery time?')">⏱️ Time</button>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')sendMessage()">
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customerLocation = null;
+        let restaurants = {};
+        let cart = [];
+        let currentRestaurant = null;
+        let userName = 'Customer';
+        let myOrders = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            // Auto-refresh orders every 10 seconds
+            setInterval(loadOrders, 10000);
+        });
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user-role');
+                if (!response.ok) throw new Error('Not logged in');
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    userName = 'Customer';
+                    document.getElementById('username').textContent = userName;
+                    return;
+                }
+                const data = await response.json();
+                userName = data.username || 'Customer';
+                document.getElementById('username').textContent = userName;
+            } catch (error) {
+                userName = 'Customer';
+                document.getElementById('username').textContent = userName;
+            }
+        }
+
+        function showManualEntry() {
+            document.getElementById('manualEntry').classList.add('show');
+        }
+
+        function requestLocation() {
+            if (navigator.geolocation) {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '📍 Detecting location...';
+                btn.disabled = true;
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        customerLocation = {
+                            lat: parseFloat(position.coords.latitude),
+                            lng: parseFloat(position.coords.longitude)
+                        };
+                        console.log('Auto-detected location:', customerLocation);
+                        document.getElementById('locationPrompt').style.display = 'none';
+                        document.getElementById('chatFab').style.display = 'flex';
+                        loadRestaurants();
+                        loadOrders();
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        alert('Location access denied. Please use manual entry.');
+                        showManualEntry();
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert('Geolocation not supported. Please use manual entry.');
+                showManualEntry();
+            }
+        }
+
+        function setManualLocation() {
+            const lat = parseFloat(document.getElementById('manualLat').value);
+            const lng = parseFloat(document.getElementById('manualLng').value);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                alert('Please enter valid numbers for latitude and longitude');
+                return;
+            }
+            
+            if (lat < -90 || lat > 90) {
+                alert('Latitude must be between -90 and 90');
+                return;
+            }
+            
+            if (lng < -180 || lng > 180) {
+                alert('Longitude must be between -180 and 180');
+                return;
+            }
+            
+            customerLocation = { 
+                lat: lat, 
+                lng: lng 
+            };
+            console.log('Manual location set:', customerLocation);
+            document.getElementById('locationPrompt').style.display = 'none';
+            document.getElementById('chatFab').style.display = 'flex';
+            loadRestaurants();
+            loadOrders();
+        }
+
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        async function loadRestaurants() {
+            if (!customerLocation) {
+                console.log('No customer location set');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/shops');
+                const data = await response.json();
+                
+                console.log('Customer location:', customerLocation);
+                console.log('API response:', data);
+                
+                restaurants = {};
+                
+                const shopsList = Array.isArray(data) ? data : Object.values(data);
+                
+                for (const shop of shopsList) {
+                    const shopLat = parseFloat(shop.latitude);
+                    const shopLng = parseFloat(shop.longitude);
+                    
+                    console.log(`Shop: ${shop.name || shop.restaurant_name}, Lat: ${shopLat}, Lng: ${shopLng}`);
+                    
+                    if (!isNaN(shopLat) && !isNaN(shopLng)) {
+                        const dist = calculateDistance(
+                            customerLocation.lat, 
+                            customerLocation.lng,
+                            shopLat, 
+                            shopLng
+                        );
+                        
+                        console.log(`Distance to ${shop.name || shop.restaurant_name}: ${dist.toFixed(2)} km`);
+                        
+                        if (dist <= 20) {
+                            restaurants[shop.id] = {
+                                ...shop, 
+                                distance: dist,
+                                name: shop.restaurant_name || shop.name,
+                                restaurant_name: shop.restaurant_name || shop.name
+                            };
+                            console.log(`Added restaurant: ${shop.name || shop.restaurant_name}`);
+                        }
+                    } else {
+                        console.log(`Invalid coordinates for shop: ${shop.name || shop.restaurant_name}`);
+                    }
+                }
+                
+                console.log('Filtered restaurants within 20km:', restaurants);
+                displayRestaurants();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading restaurants:', error);
+            }
+        }
+
+        function displayRestaurants() {
+            const container = document.getElementById('restaurantsContainer');
+            const list = Object.values(restaurants);
+            
+            console.log(`Displaying ${list.length} restaurants`);
+            
+            if (list.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;"><div class="empty-state"><div class="empty-state-icon">🏪</div><h3>No restaurants within 20km</h3><p style="margin-top: 10px; color: #666;">Customer Location: Lat ' + customerLocation.lat.toFixed(4) + ', Lng ' + customerLocation.lng.toFixed(4) + '</p></div></div>';
+                return;
+            }
+            
+            list.sort((a, b) => a.distance - b.distance);
+            container.innerHTML = list.map(r => `
+                <div class="restaurant-card" onclick="openMenu('${r.id}')">
+                    <div class="restaurant-header">
+                        <div class="restaurant-avatar">🍽️</div>
+                        <div class="restaurant-info">
+                            <h3>${r.restaurant_name || r.name}</h3>
+                            <div class="cuisine">${r.cuisine_type || r.cuisine || 'Multi Cuisine'}</div>
+                        </div>
+                    </div>
+                    <div class="restaurant-stats">
+                        <span class="distance-badge">📍 ${r.distance.toFixed(2)} km</span>
+                        <span>⭐ 4.5</span>
+                        <span>⏱️ ${Math.round(r.distance * 5 + 15)} mins</span>
+                    </div>
+                    <div class="items-preview">${(r.items || r.menuItems || []).length} items available</div>
+                </div>
+            `).join('');
+        }
+
+        async function openMenu(id) {
+            currentRestaurant = restaurants[id];
+            if (!currentRestaurant) return;
+            document.getElementById('modalRestaurantName').textContent = currentRestaurant.restaurant_name || currentRestaurant.name;
+            document.getElementById('modalCuisineType').textContent = currentRestaurant.cuisine_type || currentRestaurant.cuisine || 'Multi Cuisine';
+            try {
+                const response = await fetch(`/api/shops/${id}/items`);
+                const items = await response.json();
+                displayMenuItems(items || []);
+                document.getElementById('menuModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayMenuItems(items) {
+            const container = document.getElementById('menuItems');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍽️</div><h3>Menu coming soon!</h3></div>';
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const qty = (cart.find(c => c.id === item.id) || {}).quantity || 0;
+                return `
+                    <div class="menu-item">
+                        <div class="item-image">🍽️</div>
+                        <div class="item-details">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-description">${item.description || 'Delicious'}</div>
+                            <div class="item-price">₹${item.price}</div>
+                        </div>
+                        <div class="item-actions">
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                                <div class="qty-display">${qty}</div>
+                                <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateQuantity(itemId, change) {
+            const item = (currentRestaurant?.items || currentRestaurant?.menuItems || []).find(i => i.id === itemId);
+            if (!item) return;
+            const existing = cart.find(c => c.id === itemId);
+            if (existing) {
+                existing.quantity += change;
+                if (existing.quantity <= 0) cart = cart.filter(c => c.id !== itemId);
+            } else if (change > 0) {
+                cart.push({
+                    id: itemId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: change,
+                    restaurant: currentRestaurant.restaurant_name || currentRestaurant.name,
+                    restaurantId: currentRestaurant.id
+                });
+            }
+            fetch(`/api/shops/${currentRestaurant.id}/items`)
+                .then(res => res.json())
+                .then(items => displayMenuItems(items || []));
+            updateCartDisplay();
+            updateStats();
+        }
+
+        function updateCartDisplay() {
+            const container = document.getElementById('cartContainer');
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛒</div><h3>Your cart is empty</h3></div>';
+                return;
+            }
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            container.innerHTML = `
+                <div class="cart-items">
+                    ${cart.map(item => `
+                        <div class="cart-item">
+                            <div>
+                                <div class="item-name">${item.name}</div>
+                                <div style="color:#666;font-size:14px;">${item.restaurant}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div>₹${item.price} x ${item.quantity}</div>
+                                <div style="font-weight:600;">₹${item.price * item.quantity}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="cart-total">Total: ₹${total}</div>
+                <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+            `;
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
+                console.log('All orders from API:', orders);
+                console.log('Current username:', userName);
+                
+                myOrders = Array.isArray(orders) ? orders.filter(o => o.customer === userName) : [];
+                console.log('My orders:', myOrders);
+                
+                document.getElementById('orderCount').textContent = myOrders.length;
+                
+                if (myOrders.length > 0) {
+                    document.getElementById('ordersSection').style.display = 'block';
+                    displayOrders();
+                } else {
+                    document.getElementById('ordersSection').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        function displayOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            if (myOrders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><h3>No orders yet</h3><p>Order from nearby restaurants!</p></div>';
+                return;
+            }
+            
+            // Sort by newest first
+            const sortedOrders = [...myOrders].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            container.innerHTML = sortedOrders.map(order => {
+                const statusText = getStatusText(order.status);
+                const timeline = getTimeline(order.status);
+                
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-id">Order #${order.id}</div>
+                            <div class="order-status status-${order.status}">${statusText}</div>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-restaurant">🍽️ ${order.restaurant}</div>
+                            <div class="order-items">
+                                ${(order.items || []).map(item => `${item.quantity}x ${item.name}`).join(', ')}
+                            </div>
+                            ${order.deliveryPerson ? `
+                                <div class="order-delivery-info">
+                                    🏍️ Delivery Partner: <strong>${order.deliveryPerson}</strong>
+                                </div>
+                            ` : ''}
+                            <div class="order-delivery-info">
+                                📍 Delivery to: ${order.delivery_address || 'Your Location'}
+                            </div>
+                        </div>
+                        <div class="status-timeline">
+                            ${timeline.map(step => `
+                                <div class="timeline-step ${step.active ? 'active' : ''} ${step.completed ? 'completed' : ''}">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-label">${step.label}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-total">Total: ₹${order.total}</div>
+                            <div class="order-time">${formatTime(order.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Order Placed',
+                'Placed': 'Order Placed',
+                'placed': 'Order Placed',
+                'Preparing': 'Being Prepared',
+                'preparing': 'Being Prepared',
+                'Ready': 'Ready for Pickup',
+                'ready': 'Ready for Pickup',
+                'delivering': 'Out for Delivery',
+                'picked_up': 'Out for Delivery',
+                'completed': 'Delivered'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getTimeline(status) {
+            const steps = [
+                { label: 'Placed', key: ['pending', 'Placed', 'placed'] },
+                { label: 'Preparing', key: ['Preparing', 'preparing'] },
+                { label: 'Ready', key: ['Ready', 'ready'] },
+                { label: 'Delivering', key: ['delivering', 'picked_up'] },
+                { label: 'Delivered', key: ['completed'] }
+            ];
+            
+            let foundCurrent = false;
+            return steps.map(step => {
+                const isActive = step.key.includes(status);
+                const isCompleted = foundCurrent || steps.indexOf(step) < steps.findIndex(s => s.key.includes(status));
+                
+                if (isActive) foundCurrent = true;
+                
+                return {
+                    label: step.label,
+                    active: isActive,
+                    completed: isCompleted && !isActive
+                };
+            });
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+            if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            return 'Just now';
+        }
+
+        function updateStats() {
+            document.getElementById('restaurantCount').textContent = Object.keys(restaurants).length;
+            document.getElementById('cartCount').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+
+        function closeModal() {
+            document.getElementById('menuModal').style.display = 'none';
+        }
+
+        async function checkout() {
+            if (cart.length === 0 || !customerLocation) {
+                alert('Please add items to cart and enable location');
+                return;
+            }
+            
+            const orderData = {
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                restaurant: cart[0]?.restaurant,
+                customer: userName,
+                delivery_address: 'Customer Location',
+                customer_latitude: customerLocation.lat,
+                customer_longitude: customerLocation.lng,
+                status: 'Placed'  // FIXED: Changed from 'pending' to 'Placed'
+            };
+            
+            console.log('Placing order:', orderData);
+            
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+                const result = await response.json();
+                console.log('Order response:', result);
+                
+                if (result.success) {
+                    alert(`✅ Order placed successfully!\n\nOrder ID: ${result.order_id}\nTotal: ₹${orderData.total}\n\nYou can track your order below.`);
+                    cart = [];
+                    updateCartDisplay();
+                    updateStats();
+                    await loadOrders();
+                    closeModal();
+                } else {
+                    alert('Failed to place order. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert('Error placing order. Please try again.');
+            }
+        }
+
+        function logout() {
+            if (confirm('Logout?')) window.location.href = '/logout';
+        }
+
+        function getAIResponse(msg) {
+            const m = msg.toLowerCase();
+            if (m.includes('restaurant') || m.includes('nearby')) {
+                const list = Object.values(restaurants);
+                if (list.length === 0) return "No restaurants within 20km. Enable location!";
+                return `📍 Nearby restaurants:\n\n${list.slice(0,3).map(r => `🍽️ ${r.restaurant_name || r.name} - ${r.distance.toFixed(1)}km`).join('\n')}`;
+            }
+            if (m.includes('track') || m.includes('order')) {
+                if (myOrders.length === 0) return "No orders yet! Browse restaurants and place your first order.";
+                const latest = myOrders[myOrders.length - 1];
+                return `📦 Latest order:\n\nID: #${latest.id}\nRestaurant: ${latest.restaurant}\nStatus: ${getStatusText(latest.status)}\nTotal: ₹${latest.total}\n${latest.deliveryPerson ? `\n🏍️ Delivery Partner: ${latest.deliveryPerson}` : ''}`;
+            }
+            if (m.includes('cart')) {
+                if (cart.length === 0) return "Cart is empty! Add items from nearby restaurants.";
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                return `🛒 Cart:\n\n${cart.map(i => `${i.quantity}x ${i.name} - ₹${i.price * i.quantity}`).join('\n')}\n\nTotal: ₹${total}`;
+            }
+            if (m.includes('delivery') || m.includes('time')) {
+                return "⏱️ Average delivery: 25-35 minutes\n\nIncludes:\n• Restaurant prep: 10-15 mins\n• Delivery: 15-20 mins";
+            }
+            if (m.includes('recommend') || m.includes('suggest')) {
+                const list = Object.values(restaurants);
+                if (list.length === 0) return "Enable location first to see recommendations!";
+                const random = list[Math.floor(Math.random() * list.length)];
+                return `🍕 Recommendation:\n\n${random.restaurant_name || random.name}\n${random.cuisine_type || 'Multi Cuisine'}\n📍 ${random.distance.toFixed(1)}km away\n⏱️ ${Math.round(random.distance * 5 + 15)} mins`;
+            }
+            if (m.includes('hi') || m.includes('hello')) {
+                return `👋 Hello ${userName}!\n\n📊 Your Stats:\n🏪 ${Object.keys(restaurants).length} restaurants nearby\n📦 ${myOrders.length} order(s) placed\n🛒 ${cart.length} item(s) in cart`;
+            }
+            return `I can help with:\n🏪 Finding restaurants\n📦 Tracking orders\n🍕 Recommendations\n⏱️ Delivery times\n\nJust ask me!`;
+        }
+
+        function openChat() {
+            document.getElementById('chatModal').style.display = 'block';
+        }
+
+        function closeChat() {
+            document.getElementById('chatModal').style.display = 'none';
+        }
+
+        function sendQuickReply(msg) {
+            document.getElementById('chatInput').value = msg;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const container = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+            container.innerHTML += `
+                <div class="chat-message sent">
+                    <div class="message-avatar">👤</div>
+                    <div class="message-content">
+                        <div class="message-bubble">${msg}</div>
+                        <div class="message-time" style="text-align:right;">${time}</div>
+                    </div>
+                </div>
+            `;
+            container.scrollTop = container.scrollHeight;
+            input.value = '';
+            setTimeout(() => {
+                const response = getAIResponse(msg);
+                container.innerHTML += `
+                    <div class="chat-message received">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            <div class="message-bubble">${response.replace(/\n/g, '<br>')}</div>
+                            <div class="message-time">Just now</div>
+                            <span class="ai-badge">AI Powered</span>
+                        </div>
+                    </div>
+                `;
+                container.scrollTop = container.scrollHeight;
+            }, 1000);
+        }
+
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('menuModal')) closeModal();
+        }
+    </script>
+</body>
+</html>

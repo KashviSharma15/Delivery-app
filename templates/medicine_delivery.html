@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner - MediDelivery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f8f9fa;
+            overflow-x: hidden;
+        }
+
+        /* Location Permission Modal */
+        .location-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .location-modal.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .location-content {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .location-icon {
+            font-size: 80px;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .location-content h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .location-content p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .location-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .location-btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .location-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .location-btn.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .location-btn.secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .divider {
+            margin: 1rem 0;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .manual-input {
+            display: none;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .manual-input.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
+        }
+
+        .manual-input input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .manual-input input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .top-bar .status {
+            font-size: 0.875rem;
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #3b82f6;
+        }
+
+        /* Map Container */
+        .map-container {
+            position: relative;
+            height: 55vh;
+            background: #e5e7eb;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Message Notification */
+        .message-notification {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 50;
+            animation: slideDown 0.3s ease;
+        }
+
+        .message-notification.show {
+            display: flex;
+        }
+
+        .message-icon {
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .message-text {
+            flex: 1;
+        }
+
+        .message-text p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .message-text strong {
+            color: #1f2937;
+        }
+
+        .chat-now-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-now-btn:hover {
+            background: #dc2626;
+        }
+
+        .close-notification {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .delivery-partner-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 1rem;
+        }
+
+        .partner-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .partner-details {
+            flex: 1;
+        }
+
+        .partner-details h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: #1f2937;
+        }
+
+        .partner-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .contact-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-btn.chat {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .contact-btn.call {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .contact-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .order-status {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .urgent-badge {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #dc2626;
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .urgent-badge.show {
+            display: block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .action-btn.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .action-btn.secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chat-modal.active {
+            display: block;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75vh;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            animation: slideUpChat 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUpChat {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-avatar {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .chat-user-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-user-info p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .online-dot {
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #f9fafb;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chat-message.bot .message-avatar {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        }
+
+        .chat-message.user .message-avatar {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 0.875rem 1rem;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .chat-message.bot .message-bubble {
+            background: white;
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chat-message.user .message-bubble {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 0.5rem;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .quick-replies {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .quick-reply-btn {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 0.625rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .quick-reply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .chat-input-container {
+            padding: 1rem 1.5rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .map-container {
+                height: 50vh;
+            }
+
+            .chat-window {
+                height: 80vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Location Permission Modal -->
+    <div class="location-modal" id="locationModal">
+        <div class="location-content">
+            <div class="location-icon">📍</div>
+            <h2>Enable Location Access</h2>
+            <p>We need your location to find nearby medicine orders within 5km radius and navigate to pharmacies and patients.</p>
+            
+            <div id="locationButtons">
+                <button class="location-btn primary" onclick="requestLocation()">
+                    📍 Auto-Detect Location
+                </button>
+                
+                <div class="divider">OR</div>
+                
+                <button class="location-btn secondary" onclick="showManualInput()">
+                    📝 Enter Manually
+                </button>
+            </div>
+
+            <div class="manual-input" id="manualInput">
+                <input type="number" id="manualLat" placeholder="Latitude (e.g., 30.7333)" step="any">
+                <input type="number" id="manualLng" placeholder="Longitude (e.g., 76.7794)" step="any">
+                <button class="location-btn primary" onclick="setManualLocation()">
+                    ✓ Confirm Location
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <div>
+                <h1 id="topBarTitle">💊 MediDelivery Partner</h1>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Searching for medicine orders...</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <!-- Message Notification -->
+        <div class="message-notification" id="messageNotification">
+            <div class="message-icon">💬</div>
+            <div class="message-text">
+                <p>You have <strong>1 new message</strong></p>
+                <p><strong>AI Assistant can help!</strong></p>
+            </div>
+            <button class="chat-now-btn" onclick="openChat()">CHAT NOW</button>
+            <button class="close-notification" onclick="closeNotification()">×</button>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet">
+        <div class="delivery-partner-info">
+            <div class="partner-avatar">🏍️</div>
+            <div class="partner-details">
+                <h3>Hello, <span id="partnerName">Delivery Partner</span></h3>
+                <p id="deliveryStats">Waiting for orders within 5km</p>
+            </div>
+            <div class="contact-buttons">
+                <button class="contact-btn chat" onclick="openChat()" title="Chat with AI">
+                    💬
+                </button>
+                <button class="contact-btn call" onclick="callCustomer()" title="Call Patient" id="callBtn" style="display:none;">
+                    📞
+                </button>
+            </div>
+        </div>
+
+        <div class="urgent-badge" id="urgentBadge">
+            ⚠️ URGENT: Prescription medicine - Handle with care
+        </div>
+
+        <div class="order-status" id="orderStatus">
+            Waiting for medicine orders within 5km radius
+        </div>
+
+        <div class="action-buttons" id="actionButtons" style="display:none;">
+            <button class="action-btn primary" id="primaryAction">Accept Order</button>
+            <button class="action-btn secondary" onclick="viewOrderDetails()">Order Details</button>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-window">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-user-info">
+                        <h3>AI Medical Delivery Assistant</h3>
+                        <p>
+                            <span class="online-dot"></span>
+                            Always here to help
+                        </p>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="closeChat()">×</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div>
+                        <div class="message-bubble">
+                            Hello! I'm your AI medical delivery assistant. I can help you with:
+                            <br><br>
+                            🗺️ Navigation to pharmacy & patient<br>
+                            💊 Medicine order details<br>
+                            📋 Prescription verification tips<br>
+                            🏥 Patient contact information<br>
+                            ⚠️ Handling special medicines<br>
+                            🚗 Route optimization
+                            <br><br>
+                            How can I assist you today?
+                        </div>
+                        <div class="message-time">Just now</div>
+                        <span class="ai-badge">✨ AI Powered</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-replies" id="quickReplies">
+                <button class="quick-reply-btn" onclick="sendQuickReply('Where is the pharmacy?')">🏥 Pharmacy</button>
+                <button class="quick-reply-btn" onclick="sendQuickReply('Patient address?')">📍 Patient</button>
+                <button class="quick-reply-btn" onclick="sendQuickReply('Medicine details?')">💊 Medicines</button>
+                <button class="quick-reply-btn" onclick="sendQuickReply('Best route?')">🗺️ Route</button>
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="handleChatEnter(event)">
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcYf8Od5kJqm3Z1Hstp-yMup5a1WA54gA"></script>
+    
+    <script>
+        let map = null;
+        let currentOrder = null;
+        let deliveryPartnerLocation = null;
+        let partnerName = 'Delivery Partner';
+        let markers = [];
+        let nearbyOrders = [];
+        let directionsService = null;
+        let directionsRenderer = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserInfo();
+        });
+
+        // Get user info
+        async function getUserInfo() {
+            try {
+                const response = await fetch('/api/user-role');
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                // Check content type before parsing JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format');
+                }
+                
+                const data = await response.json();
+                console.log('User role API response:', data);
+                
+                // Check if user is authenticated and in medicine service
+                if (data.authenticated && data.service_type === 'medicine' && data.role === 'delivery') {
+                    partnerName = data.username || 'Delivery Partner';
+                    document.getElementById('partnerName').textContent = partnerName;
+                    console.log('✅ Delivery partner logged in:', partnerName);
+                } else if (data.authenticated && data.service_type === 'medicine') {
+                    // User is logged in but not as delivery partner
+                    partnerName = data.username || 'User';
+                    document.getElementById('partnerName').textContent = partnerName;
+                    console.log('⚠️ Logged in as:', data.role, '(Expected: delivery)');
+                } else {
+                    // Not logged in or wrong service
+                    throw new Error('Not logged in to medicine delivery service');
+                }
+                
+            } catch (error) {
+                console.log('ℹ️ Running in demo mode');
+                console.log('   Reason:', error.message);
+                
+                // Use a demo name
+                partnerName = 'Demo Delivery Partner';
+                document.getElementById('partnerName').textContent = partnerName;
+                console.log('   Using demo account:', partnerName);
+            }
+        }
+
+        // Show manual input
+        function showManualInput() {
+            document.getElementById('locationButtons').style.display = 'none';
+            document.getElementById('manualInput').classList.add('active');
+        }
+
+        // Request location 
+        function requestLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser. Please use manual entry.');
+                showManualInput();
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '📍 Detecting location...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    deliveryPartnerLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    console.log('Location detected:', deliveryPartnerLocation);
+                    document.getElementById('locationModal').classList.add('hidden');
+                    initializeDeliverySystem();
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    alert('Location access denied. Please use manual entry.');
+                    showManualInput();
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Set manual location
+        function setManualLocation() {
+            const lat = parseFloat(document.getElementById('manualLat').value);
+            const lng = parseFloat(document.getElementById('manualLng').value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                alert('Please enter valid numbers');
+                return;
+            }
+
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                alert('Invalid coordinates. Lat: -90 to 90, Lng: -180 to 180');
+                return;
+            }
+
+            deliveryPartnerLocation = { lat, lng };
+            console.log('Manual location set:', deliveryPartnerLocation);
+            document.getElementById('locationModal').classList.add('hidden');
+            initializeDeliverySystem();
+        }
+
+        // Initialize map
+        function initMap() {
+            if (!deliveryPartnerLocation) return;
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: deliveryPartnerLocation,
+                disableDefaultUI: true,
+                zoomControl: false,
+                styles: [
+                    {
+                        featureType: 'poi',
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'off' }]
+                    }
+                ]
+            });
+
+            // Add delivery partner marker
+            new google.maps.Marker({
+                position: deliveryPartnerLocation,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: '#3b82f6',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 3
+                },
+                title: 'Your Location'
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#3b82f6',
+                    strokeWeight: 5
+                }
+            });
+        }
+
+        // Initialize delivery system
+        async function initializeDeliverySystem() {
+            initMap();
+
+            try {
+                const response = await fetch('/api/medicine-orders');
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                const allOrders = await response.json();
+
+                console.log('=== DELIVERY PARTNER: Loading Orders ===');
+                console.log('All medicine orders from API:', allOrders);
+
+                if (!Array.isArray(allOrders) || allOrders.length === 0) {
+                    document.getElementById('orderStatus').textContent = 'No medicine orders available at the moment';
+                    document.getElementById('statusText').textContent = 'No orders available';
+                    return;
+                }
+
+                // Filter orders that are ACCEPTED (ready for pickup by delivery partner)
+                nearbyOrders = [];
+
+                for (const order of allOrders) {
+                    console.log(`Checking order ${order.id}: Status = "${order.status}"`);
+                    
+                    // ONLY show orders with status "accepted" (pharmacist has accepted them)
+                    if (order.status !== 'accepted') {
+                        console.log(`  -> Skipping order ${order.id}: Status is "${order.status}", not "accepted"`);
+                        continue;
+                    }
+
+                    console.log(`  -> Order ${order.id} has "accepted" status, checking pharmacy location...`);
+
+                    // Get pharmacy location
+                    const pharmacyResponse = await fetch('/api/pharmacies');
+                    
+                    if (!pharmacyResponse.ok) {
+                        console.warn('Could not fetch pharmacies');
+                        continue;
+                    }
+                    
+                    const pharmacies = await pharmacyResponse.json();
+
+                    let pharmacyLocation = null;
+                    let pharmacyData = null;
+
+                    for (const pharmacyId in pharmacies) {
+                        const pharmacy = pharmacies[pharmacyId];
+                        if (pharmacy.name === order.pharmacy || pharmacy.pharmacy_name === order.pharmacy) {
+                            pharmacyData = pharmacy;
+                            if (pharmacy.latitude && pharmacy.longitude) {
+                                pharmacyLocation = {
+                                    lat: parseFloat(pharmacy.latitude),
+                                    lng: parseFloat(pharmacy.longitude)
+                                };
+                                console.log(`  -> Found pharmacy "${pharmacy.name}" at:`, pharmacyLocation);
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!pharmacyLocation) {
+                        console.log(`  -> Skipping order ${order.id}: Pharmacy location not found for "${order.pharmacy}"`);
+                        continue;
+                    }
+
+                    // Calculate distance to pharmacy
+                    const distanceToPharmacy = calculateDistance(
+                        deliveryPartnerLocation.lat,
+                        deliveryPartnerLocation.lng,
+                        pharmacyLocation.lat,
+                        pharmacyLocation.lng
+                    );
+
+                    console.log(`  -> Distance to ${order.pharmacy}: ${distanceToPharmacy.toFixed(2)} km`);
+
+                    // Only include orders within 5km (CHANGED FROM 15km)
+                    if (distanceToPharmacy <= 5) {
+                        const patientLocation = {
+                            lat: parseFloat(order.patient_latitude || order.patientLat || order.customerLocation?.lat || 0),
+                            lng: parseFloat(order.patient_longitude || order.patientLng || order.customerLocation?.lng || 0)
+                        };
+
+                        console.log(`  -> Order ${order.id} patient location:`, patientLocation);
+
+                        if (patientLocation.lat === 0 || patientLocation.lng === 0) {
+                            console.log(`  -> Skipping order ${order.id}: Patient location not found or invalid`);
+                            continue;
+                        }
+
+                        const deliveryDistance = calculateDistance(
+                            pharmacyLocation.lat,
+                            pharmacyLocation.lng,
+                            patientLocation.lat,
+                            patientLocation.lng
+                        );
+
+                        console.log(`  -> Delivery distance from pharmacy to patient: ${deliveryDistance.toFixed(2)} km`);
+
+                        // Check if prescription is required
+                        const isPrescriptionOrder = order.requires_prescription === true || 
+                                                   (order.items && order.items.some(item => item.requires_prescription));
+
+                        // Extract delivery address and phone
+                        const deliveryAddress = order.delivery_address || order.address || 'Patient Location';
+                        const patientPhone = order.patient_phone || order.phone || '+91-XXXXXXXXXX';
+
+                        nearbyOrders.push({
+                            ...order,
+                            pharmacyLat: pharmacyLocation.lat,
+                            pharmacyLng: pharmacyLocation.lng,
+                            pharmacyAddress: pharmacyData?.address || 'Pharmacy Location',
+                            patientLat: patientLocation.lat,
+                            patientLng: patientLocation.lng,
+                            patientPhone: patientPhone,
+                            delivery_address: deliveryAddress,
+                            distanceToPharmacy: distanceToPharmacy,
+                            deliveryDistance: deliveryDistance,
+                            deliveryFee: Math.max(40, Math.round(order.total * 0.08)),
+                            isPrescriptionOrder: isPrescriptionOrder
+                        });
+
+                        console.log(`  -> ✅ Order ${order.id} ADDED to nearby orders (within 5km)`);
+                    } else {
+                        console.log(`  -> ❌ Order ${order.id} is ${distanceToPharmacy.toFixed(2)}km away (beyond 5km limit)`);
+                    }
+                }
+
+                console.log('=== FINAL RESULT ===');
+                console.log(`Found ${nearbyOrders.length} medicine orders within 5km with "accepted" status`);
+                console.log('Nearby orders:', nearbyOrders);
+
+                if (nearbyOrders.length === 0) {
+                    document.getElementById('orderStatus').textContent = 'No accepted medicine orders within 5km radius. Waiting for new orders...';
+                    document.getElementById('statusText').textContent = 'No orders nearby';
+                } else {
+                    // Sort by urgency and distance
+                    nearbyOrders.sort((a, b) => {
+                        // Prioritize prescription orders
+                        if (a.isPrescriptionOrder && !b.isPrescriptionOrder) return -1;
+                        if (!a.isPrescriptionOrder && b.isPrescriptionOrder) return 1;
+                        // Then by high value
+                        if (a.total > 1000 && b.total <= 1000) return -1;
+                        if (a.total <= 1000 && b.total > 1000) return 1;
+                        // Finally by distance
+                        return a.distanceToPharmacy - b.distanceToPharmacy;
+                    });
+
+                    // Show first available order
+                    currentOrder = nearbyOrders[0];
+                    console.log('Displaying order:', currentOrder);
+                    displayOrder(currentOrder);
+                    showOrderOnMap(currentOrder);
+                }
+
+            } catch (error) {
+                console.error('Error loading medicine orders:', error);
+                document.getElementById('orderStatus').textContent = 'Error loading orders. Please refresh.';
+                document.getElementById('statusText').textContent = 'Error loading orders';
+            }
+
+            // Set up auto-refresh every 10 seconds to check for new orders
+            setInterval(() => {
+                if (!currentOrder) {
+                    console.log('Auto-refreshing orders...');
+                    initializeDeliverySystem();
+                }
+            }, 10000);
+        }
+
+        // Calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth radius in km
+            const dLat = toRadians(lat2 - lat1);
+            const dLng = toRadians(lng2 - lng1);
+
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function toRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        // Display order details
+        function displayOrder(order) {
+            document.getElementById('topBarTitle').textContent = order.pharmacy;
+            document.getElementById('statusText').textContent = 'Medicine order available';
+
+            const orderStatusEl = document.getElementById('orderStatus');
+            orderStatusEl.innerHTML = '';
+            
+            const strongEl = document.createElement('strong');
+            strongEl.textContent = order.pharmacy;
+            orderStatusEl.appendChild(strongEl);
+            
+            orderStatusEl.appendChild(document.createElement('br'));
+            
+            const detailsText = document.createTextNode(`📍 ${order.distanceToPharmacy.toFixed(1)}km away • 💰 Earn ₹${order.deliveryFee}`);
+            orderStatusEl.appendChild(detailsText);
+
+            // Show urgent badge for prescription orders
+            if (order.isPrescriptionOrder) {
+                document.getElementById('urgentBadge').classList.add('show');
+            }
+
+            document.getElementById('actionButtons').style.display = 'flex';
+
+            const primaryBtn = document.getElementById('primaryAction');
+            primaryBtn.textContent = `Accept Order (₹${order.deliveryFee})`;
+            primaryBtn.onclick = () => acceptOrder(order);
+
+            document.getElementById('deliveryStats').textContent = `${nearbyOrders.length} medicine orders available within 5km`;
+
+            // Show message notification
+            document.getElementById('messageNotification').classList.add('show');
+
+            // Show call button
+            document.getElementById('callBtn').style.display = 'flex';
+        }
+
+        // Show order on map
+        function showOrderOnMap(order) {
+            // Clear existing markers
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            // Pharmacy marker
+            const pharmacyMarker = new google.maps.Marker({
+                position: { lat: order.pharmacyLat, lng: order.pharmacyLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#10b981',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2
+                },
+                title: order.pharmacy
+            });
+            markers.push(pharmacyMarker);
+
+            // Patient marker
+            const patientMarker = new google.maps.Marker({
+                position: { lat: order.patientLat, lng: order.patientLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#ef4444',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2
+                },
+                title: 'Patient Location'
+            });
+            markers.push(patientMarker);
+
+            // Fit bounds to show all markers
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend(deliveryPartnerLocation);
+            bounds.extend({ lat: order.pharmacyLat, lng: order.pharmacyLng });
+            bounds.extend({ lat: order.patientLat, lng: order.patientLng });
+            map.fitBounds(bounds);
+        }
+
+        // Call patient function
+        function callCustomer() {
+            if (!currentOrder) {
+                alert('No active order to call patient');
+                return;
+            }
+
+            const phoneNumber = currentOrder.patientPhone || currentOrder.patient_phone || 'Not available';
+
+            if (phoneNumber === 'Not available' || phoneNumber === '+91-XXXXXXXXXX') {
+                alert('Patient phone number not available.\n\nPlease contact through the chat or check order details.');
+                return;
+            }
+
+            const confirmed = confirm(`Call Patient?\n\nPhone: ${phoneNumber}\n\nNote: This will open your phone's dialer.`);
+
+            if (confirmed) {
+                window.location.href = `tel:${phoneNumber}`;
+            }
+        }
+
+        // Accept order
+        async function acceptOrder(order) {
+            try {
+                console.log('Accepting order:', order.id);
+                const response = await fetch(`/api/medicine-orders/${order.id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'delivering',
+                        deliveryPerson: partnerName,
+                        acceptedAt: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    currentOrder = order;
+                    document.getElementById('topBarTitle').textContent = 'Go to Pharmacy';
+                    document.getElementById('statusText').textContent = 'Order accepted';
+                    
+                    const orderStatusEl = document.getElementById('orderStatus');
+                    orderStatusEl.innerHTML = '';
+                    
+                    const strongEl = document.createElement('strong');
+                    strongEl.textContent = `Pickup from ${order.pharmacy}`;
+                    orderStatusEl.appendChild(strongEl);
+                    
+                    orderStatusEl.appendChild(document.createElement('br'));
+                    
+                    const addressText = document.createTextNode(`📍 ${order.pharmacyAddress}`);
+                    orderStatusEl.appendChild(addressText);
+
+                    const primaryBtn = document.getElementById('primaryAction');
+                    primaryBtn.textContent = 'Mark Picked Up';
+                    primaryBtn.onclick = () => markPickedUp(order);
+                } else {
+                    alert('Failed to accept order. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error accepting order:', error);
+                alert('Error accepting order. Please try again.');
+            }
+        }
+
+        // Mark picked up
+        async function markPickedUp(order) {
+            const confirmMsg = order.isPrescriptionOrder 
+                ? '⚠️ Prescription Order\n\nPlease verify:\n✓ Prescription collected from pharmacy\n✓ Medicines match prescription\n✓ Package sealed properly\n\nMark as picked up?'
+                : 'Confirm medicines picked up from pharmacy?';
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/medicine-orders/${order.id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'picked_up',
+                        pickedUpAt: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('topBarTitle').textContent = 'Out for Delivery';
+                    document.getElementById('statusText').textContent = 'Delivering medicines';
+                    
+                    const orderStatusEl = document.getElementById('orderStatus');
+                    orderStatusEl.innerHTML = '';
+                    
+                    const strongEl = document.createElement('strong');
+                    strongEl.textContent = `Deliver to ${order.patient || 'Patient'}`;
+                    orderStatusEl.appendChild(strongEl);
+                    
+                    orderStatusEl.appendChild(document.createElement('br'));
+                    
+                    const addressText = document.createTextNode(`📍 ${order.delivery_address || 'Patient Location'}`);
+                    orderStatusEl.appendChild(addressText);
+
+                    const primaryBtn = document.getElementById('primaryAction');
+                    primaryBtn.textContent = 'Mark Delivered';
+                    primaryBtn.onclick = () => markDelivered(order);
+                } else {
+                    alert('Failed to update status. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Error updating order. Please try again.');
+            }
+        }
+
+        // Mark delivered
+        async function markDelivered(order) {
+            const confirmMsg = order.isPrescriptionOrder
+                ? `⚠️ Prescription Medicine Delivery\n\nPlease confirm:\n✓ Delivered to ${order.patient || 'patient'}\n✓ Prescription handed over\n✓ Patient verified medicines\n\nYou will earn ₹${order.deliveryFee}`
+                : `Confirm delivery to ${order.patient || 'patient'}?\n\nYou will earn ₹${order.deliveryFee}`;
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/medicine-orders/${order.id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'completed',
+                        completedAt: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    alert(`✅ Medicine Delivery Completed!\n\nEarned: ₹${order.deliveryFee}\n\nThank you for safe delivery!`);
+                    location.reload();
+                } else {
+                    alert('Failed to complete delivery. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error completing delivery:', error);
+                alert('Error completing delivery. Please try again.');
+            }
+        }
+
+        // View order details
+        function viewOrderDetails() {
+            if (!currentOrder) {
+                alert('No active order');
+                return;
+            }
+
+            const items = Array.isArray(currentOrder.items)
+                ? currentOrder.items.map(item => {
+                    let itemStr = `${item.quantity}x ${item.name}`;
+                    if (item.requires_prescription) {
+                        itemStr += ' (℞ Prescription Required)';
+                    }
+                    return itemStr;
+                }).join('\n')
+                : 'Medicine items';
+
+            const prescriptionNote = currentOrder.isPrescriptionOrder 
+                ? '\n⚠️ PRESCRIPTION ORDER - Verify prescription at pharmacy\n'
+                : '';
+
+            alert(`💊 Medicine Order Details\n\n` +
+                  `Order ID: ${currentOrder.id}\n` +
+                  `Pharmacy: ${currentOrder.pharmacy}\n` +
+                  `Pharmacy Address: ${currentOrder.pharmacyAddress}\n\n` +
+                  `Medicines:\n${items}\n` +
+                  `Order Value: ₹${currentOrder.total}\n${prescriptionNote}\n` +
+                  `Patient: ${currentOrder.patient || 'Patient'}\n` +
+                  `Delivery Address: ${currentOrder.delivery_address || 'Patient Location'}\n` +
+                  `Patient Phone: ${currentOrder.patientPhone}\n\n` +
+                  `Your Delivery Fee: ₹${currentOrder.deliveryFee}\n` +
+                  `Distance to Pharmacy: ${currentOrder.distanceToPharmacy.toFixed(1)}km\n` +
+                  `Delivery Distance: ${currentOrder.deliveryDistance.toFixed(1)}km\n\n` +
+                  `⚠️ Handle medicines with care during delivery`);
+        }
+
+        // AI Chatbot responses
+        function getAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+
+            if (!currentOrder) {
+                return "I don't see an active medicine order right now. Please accept an order first, and I'll be happy to help you with delivery details!";
+            }
+
+            if (message.includes('pharmacy') || message.includes('pickup') || message.includes('collect')) {
+                let response = `🏥 Pharmacy Details:\n\n${currentOrder.pharmacy}\n📍 Address: ${currentOrder.pharmacyAddress}\n🗺️ Distance: ${currentOrder.distanceToPharmacy.toFixed(1)}km from you`;
+                
+                if (currentOrder.isPrescriptionOrder) {
+                    response += '\n\n⚠️ IMPORTANT: This is a prescription order. Please verify:\n✓ Prescription document from pharmacy\n✓ Medicines match prescription\n✓ Package is properly sealed';
+                }
+                
+                return response + '\n\nHead there to collect the medicines!';
+            }
+
+            if (message.includes('patient') || message.includes('address') || message.includes('deliver')) {
+                return `🏠 Patient Delivery Address:\n\nPatient: ${currentOrder.patient || 'Patient'}\n📍 Address: ${currentOrder.delivery_address || 'Patient Location'}\n📞 Phone: ${currentOrder.patientPhone}\n🗺️ Distance: ${currentOrder.deliveryDistance.toFixed(1)}km from pharmacy\n\n💊 Handle medicines with care during transport!`;
+            }
+
+            if (message.includes('phone') || message.includes('call') || message.includes('contact')) {
+                return `📞 Patient Contact:\n\nPhone: ${currentOrder.patientPhone}\n\nYou can tap the blue call button (📞) in the bottom section to call the patient directly!\n\nℹ️ Call if you need directions or delivery instructions.`;
+            }
+
+            if (message.includes('medicine') || message.includes('item') || message.includes('order') || message.includes('drug')) {
+                const items = Array.isArray(currentOrder.items)
+                    ? currentOrder.items.map(item => {
+                        let itemStr = `${item.quantity}x ${item.name}`;
+                        if (item.requires_prescription) {
+                            itemStr += ' (℞)';
+                        }
+                        return itemStr;
+                    }).join('\n')
+                    : 'Medicine items';
+                
+                let response = `💊 Medicine Order:\n\n${items}\n\n💰 Order Value: ₹${currentOrder.total}\n🏍️ Your Delivery Fee: ₹${currentOrder.deliveryFee}`;
+                
+                if (currentOrder.isPrescriptionOrder) {
+                    response += '\n\n⚠️ Prescription medicine - Verify at pharmacy';
+                }
+                
+                return response;
+            }
+
+            if (message.includes('prescription') || message.includes('verify')) {
+                if (currentOrder.isPrescriptionOrder) {
+                    return `℞ Prescription Order Checklist:\n\n✓ Collect prescription document from pharmacy\n✓ Verify medicines match prescription\n✓ Check package is sealed\n✓ Handle with extra care\n✓ Deliver directly to patient\n\n⚠️ Do not open sealed packages`;
+                } else {
+                    return `This order does not require a prescription. Just collect the medicines from the pharmacy and deliver safely to the patient!`;
+                }
+            }
+
+            if (message.includes('route') || message.includes('direction') || message.includes('navigate')) {
+                return `🗺️ Delivery Route:\n\n1️⃣ Go to ${currentOrder.pharmacy}\n   Distance: ${currentOrder.distanceToPharmacy.toFixed(1)}km\n   📋 Collect medicines\n\n2️⃣ Deliver to patient\n   Distance: ${currentOrder.deliveryDistance.toFixed(1)}km\n   💊 Hand over medicines\n\nTotal distance: ${(currentOrder.distanceToPharmacy + currentOrder.deliveryDistance).toFixed(1)}km\n\n⚠️ Keep medicines in cool, dry place during transport`;
+            }
+
+            if (message.includes('earn') || message.includes('pay') || message.includes('money')) {
+                return `💰 Earnings: ₹${currentOrder.deliveryFee}\n💊 Order Value: ₹${currentOrder.total}\n\nYou'll receive payment after completing the delivery safely!`;
+            }
+
+            if (message.includes('care') || message.includes('handle') || message.includes('safe')) {
+                return `⚠️ Medicine Handling Tips:\n\n✓ Keep medicines away from direct sunlight\n✓ Don't expose to extreme heat or cold\n✓ Don't open sealed packages\n✓ Handle with care - avoid shaking\n✓ Deliver as quickly as possible\n✓ For prescription orders, hand to patient directly\n\nPatient health depends on proper medicine delivery!`;
+            }
+
+            if (message.includes('hi') || message.includes('hello')) {
+                return `👋 Hello! You're delivering medicines:\n${currentOrder.pharmacy} → ${currentOrder.patient || 'Patient'}\n\nHow can I help you?`;
+            }
+
+            return `I understand you're asking about: "${userMessage}"\n\nI can help with:\n🏥 Pharmacy & patient locations\n💊 Medicine order details\n℞ Prescription verification\n📞 Patient contact info\n🗺️ Routes & navigation\n⚠️ Safe handling tips\n💰 Earnings\n\nJust ask!`;
+        }
+
+        // Open chat
+        function openChat() {
+            document.getElementById('chatModal').classList.add('active');
+            setTimeout(() => document.getElementById('chatInput').focus(), 300);
+        }
+
+        // Close chat
+        function closeChat() {
+            document.getElementById('chatModal').classList.remove('active');
+        }
+
+        // Send quick reply
+        function sendQuickReply(message) {
+            document.getElementById('chatInput').value = message;
+            sendMessage();
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesContainer = document.getElementById('chatMessages');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+            const messageEl = document.createElement('div');
+            messageEl.className = 'chat-message user';
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.textContent = '👤';
+            
+            const contentDiv = document.createElement('div');
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = message;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.style.textAlign = 'right';
+            timeDiv.textContent = timeStr;
+            
+            contentDiv.appendChild(bubbleDiv);
+            contentDiv.appendChild(timeDiv);
+            
+            messageEl.appendChild(avatarDiv);
+            messageEl.appendChild(contentDiv);
+            
+            messagesContainer.appendChild(messageEl);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            input.value = '';
+
+            setTimeout(() => {
+                const aiResponse = getAIResponse(message);
+
+                const responseEl = document.createElement('div');
+                responseEl.className = 'chat-message bot';
+                
+                const botAvatarDiv = document.createElement('div');
+                botAvatarDiv.className = 'message-avatar';
+                botAvatarDiv.textContent = '🤖';
+                
+                const botContentDiv = document.createElement('div');
+                
+                const botBubbleDiv = document.createElement('div');
+                botBubbleDiv.className = 'message-bubble';
+                botBubbleDiv.innerHTML = aiResponse.replace(/\n/g, '<br>');
+                
+                const botTimeDiv = document.createElement('div');
+                botTimeDiv.className = 'message-time';
+                botTimeDiv.textContent = 'Just now';
+                
+                const badgeSpan = document.createElement('span');
+                badgeSpan.className = 'ai-badge';
+                badgeSpan.textContent = '✨ AI Powered';
+                
+                botContentDiv.appendChild(botBubbleDiv);
+                botContentDiv.appendChild(botTimeDiv);
+                botContentDiv.appendChild(badgeSpan);
+                
+                responseEl.appendChild(botAvatarDiv);
+                responseEl.appendChild(botContentDiv);
+                
+                messagesContainer.appendChild(responseEl);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+        }
+
+        // Handle Enter key
+        function handleChatEnter(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        // Close notification
+        function closeNotification() {
+            document.getElementById('messageNotification').classList.remove('show');
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Try to call logout endpoint
+                fetch('/logout', { method: 'POST' })
+                    .then(() => {
+                        window.location.href = '/';
+                    })
+                    .catch(() => {
+                        // If no logout endpoint, just redirect to home
+                        console.log('No logout endpoint, redirecting to home');
+                        window.location.href = '/';
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

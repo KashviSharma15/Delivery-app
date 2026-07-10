@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacist Dashboard - MediCare+</title>
+    <style>
+        :root {
+            --primary-color: #0ea5e9;
+            --primary-dark: #0284c7;
+            --accent-color: #14b8a6;
+            --teal-light: #ccfbf1;
+            --text-primary: #374151;
+            --text-secondary: #6b7280;
+            --background-primary: #ffffff;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --shadow-light: 0 2px 10px rgba(14, 165, 233, 0.15);
+            --shadow-medium: 0 4px 20px rgba(14, 165, 233, 0.2);
+            --border-radius-md: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 30%, #80deea 70%, #4dd0e1 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .location-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 2rem;
+        }
+
+        .location-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .location-box {
+            background: white;
+            border-radius: 32px;
+            padding: 3rem 2.5rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .location-icon {
+            font-size: 80px;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .location-box h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .location-box p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .location-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .location-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .location-btn.secondary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .location-btn.secondary:hover {
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .divider {
+            margin: 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .manual-input {
+            display: none;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .manual-input.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
+        }
+
+        .manual-input input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .manual-input input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .manual-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .manual-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(204, 251, 241, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(204, 251, 241, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        input, textarea, select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error-color), #dc2626);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .location-display {
+            background: rgba(14, 165, 233, 0.05);
+            padding: 0.75rem;
+            border-radius: var(--border-radius-md);
+            border: 2px dashed var(--primary-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .location-display.filled {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .pharmacies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pharmacy-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .pharmacy-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-light);
+        }
+
+        .pharmacy-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .pharmacy-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 24px;
+        }
+
+        .pharmacy-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .pharmacy-info p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .add-medicine-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(14, 165, 233, 0.05);
+            border-radius: var(--border-radius-md);
+        }
+
+        .add-medicine-section h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .medicine-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .medicine-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .medicine-details {
+            flex: 1;
+        }
+
+        .medicine-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .medicine-meta {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .orders-section {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-accepted { background: #d1fae5; color: #059669; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid var(--success-color);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);
+            z-index: 999;
+            transition: var(--transition);
+            font-size: 28px;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(14, 165, 233, 0.5);
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            width: 380px;
+            height: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 998;
+            overflow: hidden;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chatbot-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: var(--transition);
+        }
+
+        .chatbot-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #f9fafb;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.bot {
+            flex-direction: row;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .chat-message.bot .chat-avatar {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        }
+
+        .chat-message.user .chat-avatar {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .chat-bubble {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .chat-message.bot .chat-bubble {
+            background: white;
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message.user .chat-bubble {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0 1.5rem 1rem;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .suggestion-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chatbot-input {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .chatbot-input button {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .chatbot-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .pharmacies-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+
+            .chatbot-window {
+                width: calc(100vw - 2rem);
+                right: 1rem;
+                left: 1rem;
+                bottom: 5rem;
+            }
+
+            .chatbot-toggle {
+                right: 1rem;
+                bottom: 1rem;
+            }
+
+            .location-box {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="location-modal" id="locationModal">
+        <div class="location-box">
+            <button class="modal-close" onclick="closeLocationModal()">×</button>
+            <div class="location-icon">📍</div>
+            <h2>Enable Location Access</h2>
+            <p>We need your location to show nearby pharmacies within 5km radius.</p>
+            
+            <div class="location-buttons" id="locationButtons">
+                <button class="location-btn" onclick="autoDetectLocation()">
+                    📍 Auto-Detect Location
+                </button>
+                
+                <div class="divider">OR</div>
+                
+                <button class="location-btn secondary" onclick="showManualInput()">
+                    📝 Enter Manually
+                </button>
+            </div>
+
+            <div class="manual-input" id="manualInput">
+                <input type="number" id="modalLat" placeholder="Enter Latitude (e.g., 30.7333)" step="any">
+                <input type="number" id="modalLng" placeholder="Enter Longitude (e.g., 76.7794)" step="any">
+                <button class="manual-submit" onclick="submitModalLocation()">Confirm Location</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">💊 MediCare+</div>
+            <div class="user-info">
+                <span>Welcome, <strong id="username">Dr. Pharmacist</strong></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Pharmacist Dashboard</h1>
+            <p>Manage your pharmacies and medicines</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPharmacies">0</div>
+                <div class="stat-label">My Pharmacies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalMedicines">0</div>
+                <div class="stat-label">Total Medicines</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingOrders">0</div>
+                <div class="stat-label">Pending Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayRevenue">₹0</div>
+                <div class="stat-label">Today's Revenue</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏥 Add New Pharmacy</h2>
+            <form id="addPharmacyForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="pharmacyName">Pharmacy Name *</label>
+                        <input type="text" id="pharmacyName" placeholder="Enter pharmacy name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pharmacyAddress">Address *</label>
+                        <input type="text" id="pharmacyAddress" placeholder="Enter address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pharmacyLicense">License Number *</label>
+                        <input type="text" id="pharmacyLicense" placeholder="e.g., DL-12345" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pharmacy Location *</label>
+                    <div class="location-display" id="locationDisplay">
+                        📍 Click "Add Location" to set coordinates
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="openLocationModal()">
+                        📍 Add Location
+                    </button>
+                </div>
+                
+                <input type="hidden" id="pharmacyLat">
+                <input type="hidden" id="pharmacyLng">
+                
+                <button type="submit" class="btn" style="margin-top: 1rem;">➕ Add Pharmacy</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>🏪 My Pharmacies</h2>
+            <div class="pharmacies-grid" id="pharmaciesContainer"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Recent Orders</h2>
+            <div class="orders-section" id="ordersContainer"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <div id="notificationMessage"></div>
+    </div>
+
+    <div class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        💬
+    </div>
+
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <h3>🤖 Pharmacy Assistant</h3>
+            <button class="chatbot-close" onclick="toggleChatbot()">×</button>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="chat-message bot">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-bubble">
+                    Hello! I'm your pharmacy assistant. I can help you with:
+                    <br><br>
+                    • Adding pharmacies & medicines<br>
+                    • Managing orders<br>
+                    • Location settings<br>
+                    • Revenue insights<br>
+                    <br>
+                    How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-suggestions" id="chatSuggestions">
+            <button class="suggestion-btn" onclick="sendChatMessage('How do I add a pharmacy?')">Add pharmacy</button>
+            <button class="suggestion-btn" onclick="sendChatMessage('How to add medicines?')">Add medicines</button>
+            <button class="suggestion-btn" onclick="sendChatMessage('How to manage orders?')">Manage orders</button>
+            <button class="suggestion-btn" onclick="sendChatMessage('Show my stats')">My stats</button>
+        </div>
+
+        <div class="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Ask me anything..." onkeypress="handleChatEnter(event)">
+            <button onclick="sendChatInput()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let pharmacyData = {
+            user: null,
+            pharmacies: [],
+            orders: []
+        };
+
+        let tempLocation = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+
+        async function init() {
+            await loadUserInfo();
+            await loadPharmacies();
+            await loadOrders();
+            updateStats();
+            renderPharmacies();
+            renderOrders();
+            
+            document.getElementById('addPharmacyForm').addEventListener('submit', handleAddPharmacy);
+            
+            setInterval(async () => {
+                await loadOrders();
+                updateStats();
+                renderOrders();
+            }, 10000);
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user-role');
+                const data = await response.json();
+                pharmacyData.user = { name: data.username || 'Dr. Pharmacist', role: data.role };
+                document.getElementById('username').textContent = pharmacyData.user.name;
+            } catch (error) {
+                pharmacyData.user = { name: 'Demo Pharmacist', role: 'pharmacist' };
+                console.log('Using demo mode');
+            }
+        }
+
+        function openLocationModal() {
+            document.getElementById('locationModal').classList.add('active');
+            document.getElementById('manualInput').classList.remove('active');
+            document.getElementById('locationButtons').style.display = 'flex';
+        }
+
+        function closeLocationModal() {
+            document.getElementById('locationModal').classList.remove('active');
+            tempLocation = null;
+        }
+
+        function autoDetectLocation() {
+            if (!navigator.geolocation) {
+                showNotification('Geolocation is not supported by your browser', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '📍 Detecting location...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    tempLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    document.getElementById('pharmacyLat').value = tempLocation.lat;
+                    document.getElementById('pharmacyLng').value = tempLocation.lng;
+                    
+                    const display = document.getElementById('locationDisplay');
+                    display.textContent = `✅ Location: ${tempLocation.lat.toFixed(4)}, ${tempLocation.lng.toFixed(4)} (±${Math.round(tempLocation.accuracy)}m)`;
+                    display.classList.add('filled');
+                    
+                    closeLocationModal();
+                    showNotification(`Location detected! (±${Math.round(position.coords.accuracy)}m accuracy)`, 'success');
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                (error) => {
+                    let errorMsg = 'Failed to get location';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = 'Location access denied. Please enable location permissions or enter manually.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = 'Location request timed out.';
+                            break;
+                    }
+                    showNotification(errorMsg, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function showManualInput() {
+            document.getElementById('locationButtons').style.display = 'none';
+            document.getElementById('manualInput').classList.add('active');
+        }
+
+        function submitModalLocation() {
+            const lat = parseFloat(document.getElementById('modalLat').value);
+            const lng = parseFloat(document.getElementById('modalLng').value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                showNotification('Please enter valid coordinates', 'error');
+                return;
+            }
+
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                showNotification('Coordinates out of range. Lat: -90 to 90, Lng: -180 to 180', 'error');
+                return;
+            }
+
+            tempLocation = { lat, lng, manual: true };
+            document.getElementById('pharmacyLat').value = lat;
+            document.getElementById('pharmacyLng').value = lng;
+            
+            const display = document.getElementById('locationDisplay');
+            display.textContent = `✅ Location: ${lat.toFixed(4)}, ${lng.toFixed(4)} (Manual Entry)`;
+            display.classList.add('filled');
+            
+            closeLocationModal();
+            showNotification('Location set successfully!', 'success');
+        }
+
+        async function loadPharmacies() {
+            try {
+                const response = await fetch('/api/pharmacies');
+                const apiPharmacies = await response.json();
+                
+                console.log('API Pharmacies loaded:', apiPharmacies);
+                
+                const pharmaciesArray = Array.isArray(apiPharmacies) 
+                    ? apiPharmacies 
+                    : Object.values(apiPharmacies);
+                
+                pharmacyData.pharmacies = pharmaciesArray.filter(p => 
+                    p.ownerId === pharmacyData.user.name || p.owner === pharmacyData.user.name
+                );
+                
+                console.log('Filtered pharmacies for owner:', pharmacyData.pharmacies);
+            } catch (error) {
+                console.error('Error loading pharmacies:', error);
+                pharmacyData.pharmacies = [];
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/medicine-orders');
+                const allOrders = await response.json();
+                
+                console.log('All orders from API:', allOrders);
+                
+                const myPharmacyNames = pharmacyData.pharmacies.map(p => p.name || p.pharmacy_name);
+                
+                pharmacyData.orders = allOrders.filter(order => 
+                    myPharmacyNames.includes(order.pharmacy)
+                );
+                
+                console.log('My pharmacy orders:', pharmacyData.orders);
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                pharmacyData.orders = [];
+            }
+        }
+
+        function updateStats() {
+            const totalPharmacies = pharmacyData.pharmacies.length;
+            const totalMedicines = pharmacyData.pharmacies.reduce((total, pharmacy) => {
+                const medicinesCount = (pharmacy.medicines || []).length || (pharmacy.items || []).length;
+                return total + medicinesCount;
+            }, 0);
+            const pendingOrders = pharmacyData.orders.filter(order => 
+                order.status === 'pending'
+            ).length;
+            
+            const today = new Date().toDateString();
+            const todayOrders = pharmacyData.orders.filter(order => 
+                new Date(order.timestamp).toDateString() === today && order.status === 'accepted'
+            );
+            const todayRevenue = todayOrders.reduce((total, order) => 
+                total + (order.total || 0), 0);
+
+            document.getElementById('totalPharmacies').textContent = totalPharmacies;
+            document.getElementById('totalMedicines').textContent = totalMedicines;
+            document.getElementById('pendingOrders').textContent = pendingOrders;
+            document.getElementById('todayRevenue').textContent = '₹' + todayRevenue.toFixed(2);
+        }
+
+        async function handleAddPharmacy(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Add Pharmacy button clicked');
+            
+            const name = document.getElementById('pharmacyName').value.trim();
+            const address = document.getElementById('pharmacyAddress').value.trim();
+            const license = document.getElementById('pharmacyLicense').value.trim();
+            const lat = parseFloat(document.getElementById('pharmacyLat').value);
+            const lng = parseFloat(document.getElementById('pharmacyLng').value);
+            
+            console.log('Form values:', { name, address, license, lat, lng });
+            
+            if (!name || !address || !license) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (isNaN(lat) || isNaN(lng)) {
+                showNotification('Please add location coordinates first', 'error');
+                openLocationModal();
+                return;
+            }
+
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                showNotification('Invalid coordinates range', 'error');
+                return;
+            }
+            
+            const newPharmacy = {
+                id: 'ph' + Date.now(),
+                name: name,
+                pharmacy_name: name,
+                address: address,
+                license_number: license,
+                latitude: lat,
+                longitude: lng,
+                medicines: [],
+                items: [],
+                ownerId: pharmacyData.user.name,
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Adding pharmacy:', newPharmacy);
+            
+            try {
+                const response = await fetch('/api/pharmacies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newPharmacy)
+                });
+                
+                const result = await response.json();
+                
+                console.log('API response:', result);
+                
+                if (result.success) {
+                    await loadPharmacies();
+                    
+                    e.target.reset();
+                    document.getElementById('pharmacyLat').value = '';
+                    document.getElementById('pharmacyLng').value = '';
+                    const display = document.getElementById('locationDisplay');
+                    display.textContent = '📍 Click "Add Location" to set coordinates';
+                    display.classList.remove('filled');
+                    tempLocation = null;
+                    
+                    updateStats();
+                    renderPharmacies();
+                    showNotification(`Pharmacy "${name}" added successfully!`, 'success');
+                } else {
+                    showNotification('Failed to add pharmacy. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding pharmacy:', error);
+                showNotification('Error adding pharmacy. Please try again.', 'error');
+            }
+        }
+
+        function renderPharmacies() {
+            const container = document.getElementById('pharmaciesContainer');
+            
+            if (pharmacyData.pharmacies.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">🏥</div><div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">No pharmacies yet</div><div>Add your first pharmacy above to get started</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            pharmacyData.pharmacies.forEach(pharmacy => {
+                const pharmacyDiv = document.createElement('div');
+                pharmacyDiv.className = 'pharmacy-card';
+                
+                const locationInfo = pharmacy.latitude && pharmacy.longitude 
+                    ? `📍 ${parseFloat(pharmacy.latitude).toFixed(4)}, ${parseFloat(pharmacy.longitude).toFixed(4)}`
+                    : '📍 No coordinates';
+                
+                const medicineCount = pharmacy.medicines ? pharmacy.medicines.length : 0;
+                
+                pharmacyDiv.innerHTML = `
+                    <div class="pharmacy-header">
+                        <div class="pharmacy-icon">💊</div>
+                        <div class="pharmacy-info">
+                            <h3>${pharmacy.name || pharmacy.pharmacy_name}</h3>
+                            <p>🏠 ${pharmacy.address}</p>
+                            <p>📋 License: ${pharmacy.license_number || 'N/A'} | 💊 ${medicineCount} medicines</p>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">${locationInfo}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="add-medicine-section">
+                        <h4>Add Medicine</h4>
+                        <div style="display: grid; gap: 0.5rem;">
+                            <input type="text" class="input" placeholder="Medicine name" id="medName_${pharmacy.id}" style="margin-bottom: 0;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.5rem;">
+                                <input type="number" class="input" placeholder="Price" id="medPrice_${pharmacy.id}" style="margin-bottom: 0;">
+                                <input type="number" class="input" placeholder="Stock" id="medStock_${pharmacy.id}" style="margin-bottom: 0;">
+                                <select class="input" id="medType_${pharmacy.id}" style="margin-bottom: 0;">
+                                    <option value="">Type</option>
+                                    <option value="tablet">Tablet</option>
+                                    <option value="capsule">Capsule</option>
+                                    <option value="syrup">Syrup</option>
+                                    <option value="injection">Injection</option>
+                                    <option value="ointment">Ointment</option>
+                                </select>
+                                <button class="btn btn-small" onclick="addMedicine('${pharmacy.id}')">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="margin-bottom: 0.75rem; color: var(--text-primary);">Medicines</h4>
+                        <div class="medicine-grid" id="medicines_${pharmacy.id}"></div>
+                    </div>
+                `;
+                
+                container.appendChild(pharmacyDiv);
+                renderMedicines(pharmacy.id);
+            });
+        }
+
+        function renderMedicines(pharmacyId) {
+            const pharmacy = pharmacyData.pharmacies.find(p => p.id === pharmacyId);
+            const container = document.getElementById('medicines_' + pharmacyId);
+            
+            if (!pharmacy) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Pharmacy not found</div>';
+                return;
+            }
+            
+            const medicines = pharmacy.medicines || pharmacy.items || [];
+            
+            console.log(`Medicines for ${pharmacy.name}:`, medicines);
+            
+            if (medicines.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">No medicines added yet</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            medicines.forEach(medicine => {
+                const medicineDiv = document.createElement('div');
+                medicineDiv.className = 'medicine-item';
+                medicineDiv.innerHTML = `
+                    <div class="medicine-details">
+                        <div class="medicine-name">${medicine.name}</div>
+                        <div class="medicine-meta">₹${medicine.price} | Stock: ${medicine.stock} | ${medicine.type || 'General'}</div>
+                    </div>
+                    <button class="btn btn-danger btn-small" onclick="removeMedicine('${pharmacyId}', '${medicine.id}')">Remove</button>
+                `;
+                container.appendChild(medicineDiv);
+            });
+        }
+
+        async function addMedicine(pharmacyId) {
+            const name = document.getElementById('medName_' + pharmacyId).value.trim();
+            const price = parseFloat(document.getElementById('medPrice_' + pharmacyId).value);
+            const stock = parseInt(document.getElementById('medStock_' + pharmacyId).value);
+            const type = document.getElementById('medType_' + pharmacyId).value;
+            
+            if (!name || isNaN(price) || isNaN(stock) || price <= 0 || stock < 0 || !type) {
+                showNotification('Please fill in all medicine fields correctly', 'error');
+                return;
+            }
+            
+            const newMedicine = {
+                id: 'med' + Date.now(),
+                name: name,
+                price: price,
+                stock: stock,
+                type: type,
+                description: `${type} - ${name}`
+            };
+            
+            console.log('Adding medicine:', newMedicine, 'to pharmacy:', pharmacyId);
+            
+            try {
+                const response = await fetch('/api/pharmacies');
+                const allPharmacies = await response.json();
+                
+                const pharmaciesArray = Array.isArray(allPharmacies) ? allPharmacies : Object.values(allPharmacies);
+                const pharmacy = pharmaciesArray.find(p => p.id === pharmacyId);
+                
+                if (!pharmacy) {
+                    showNotification('Pharmacy not found', 'error');
+                    return;
+                }
+                
+                if (!pharmacy.medicines) pharmacy.medicines = [];
+                if (!pharmacy.items) pharmacy.items = [];
+                
+                pharmacy.medicines.push(newMedicine);
+                pharmacy.items.push(newMedicine);
+                
+                console.log('Updated pharmacy:', pharmacy);
+                
+                const saveResponse = await fetch('/api/pharmacies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(pharmacy)
+                });
+                
+                console.log('Save response status:', saveResponse.status);
+                
+                if (!saveResponse.ok) {
+                    const errorText = await saveResponse.text();
+                    console.error('API Error:', errorText);
+                    throw new Error(`HTTP ${saveResponse.status}`);
+                }
+                
+                const result = await saveResponse.json();
+                console.log('Save result:', result);
+                
+                await loadPharmacies();
+                
+                document.getElementById('medName_' + pharmacyId).value = '';
+                document.getElementById('medPrice_' + pharmacyId).value = '';
+                document.getElementById('medStock_' + pharmacyId).value = '';
+                document.getElementById('medType_' + pharmacyId).value = '';
+                
+                updateStats();
+                renderPharmacies();
+                showNotification(`Medicine "${name}" added successfully!`, 'success');
+                
+            } catch (error) {
+                console.error('Error adding medicine:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function removeMedicine(pharmacyId, medicineId) {
+            if (!confirm('Are you sure you want to remove this medicine?')) return;
+            
+            try {
+                const response = await fetch('/api/pharmacies');
+                const allPharmacies = await response.json();
+                
+                const pharmaciesArray = Array.isArray(allPharmacies) ? allPharmacies : Object.values(allPharmacies);
+                const pharmacy = pharmaciesArray.find(p => p.id === pharmacyId);
+                
+                if (!pharmacy) {
+                    showNotification('Pharmacy not found', 'error');
+                    return;
+                }
+                
+                if (pharmacy.medicines) {
+                    pharmacy.medicines = pharmacy.medicines.filter(m => m.id !== medicineId);
+                }
+                if (pharmacy.items) {
+                    pharmacy.items = pharmacy.items.filter(m => m.id !== medicineId);
+                }
+                
+                const saveResponse = await fetch('/api/pharmacies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(pharmacy)
+                });
+                
+                if (!saveResponse.ok) {
+                    throw new Error(`HTTP ${saveResponse.status}`);
+                }
+                
+                await loadPharmacies();
+                updateStats();
+                renderPharmacies();
+                showNotification('Medicine removed successfully!', 'success');
+            } catch (error) {
+                console.error('Error removing medicine:', error);
+                showNotification('Error removing medicine.', 'error');
+            }
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            console.log('=== RENDER ORDERS ===');
+            console.log('Total orders:', pharmacyData.orders.length);
+            console.log('Orders data:', pharmacyData.orders);
+            
+            if (pharmacyData.orders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">No orders yet</div><div>Customer orders will appear here</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            const sortedOrders = pharmacyData.orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            sortedOrders.forEach(order => {
+                const orderId = order.id || order.order_id || 'unknown';
+                console.log('Rendering order:', orderId, 'Status:', order.status, 'Pharmacy:', order.pharmacy);
+                
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                
+                const orderHeader = document.createElement('div');
+                orderHeader.className = 'order-header';
+                
+                const orderIdDiv = document.createElement('div');
+                orderIdDiv.className = 'order-id';
+                orderIdDiv.textContent = `Order #${orderId}`;
+                
+                const statusBadge = document.createElement('div');
+                statusBadge.className = `status-badge status-${(order.status || 'pending').toLowerCase().replace(' ', '-')}`;
+                statusBadge.textContent = order.status || 'Pending';
+                
+                orderHeader.appendChild(orderIdDiv);
+                orderHeader.appendChild(statusBadge);
+                
+                const itemsSection = document.createElement('div');
+                itemsSection.style.marginBottom = '1rem';
+                itemsSection.innerHTML = `
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        <strong>Customer:</strong> ${order.customer || 'N/A'} | <strong>Pharmacy:</strong> ${order.pharmacy || 'N/A'}
+                    </div>
+                    ${(order.items || []).map(item => `
+                        <div style="padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+                            <strong>${item.name}</strong> x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                    `).join('')}
+                `;
+                
+                const orderFooter = document.createElement('div');
+                orderFooter.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 2px solid #f3f4f6;';
+                
+                const totalDiv = document.createElement('div');
+                totalDiv.style.cssText = 'font-weight: 600; font-size: 1.1rem;';
+                totalDiv.textContent = `Total: ₹${(order.total || 0).toFixed(2)}`;
+                
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.style.cssText = 'display: flex; gap: 0.5rem;';
+                
+                const status = (order.status || 'pending').toLowerCase();
+                
+                if (status === 'pending') {
+                    const acceptBtn = document.createElement('button');
+                    acceptBtn.className = 'btn btn-small';
+                    acceptBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    acceptBtn.textContent = 'Accept Order';
+                    acceptBtn.onclick = function() {
+                        console.log('✅ Accept clicked for order:', orderId);
+                        updateOrderStatus(orderId, 'accepted');
+                    };
+                    buttonsDiv.appendChild(acceptBtn);
+                    
+                    const rejectBtn = document.createElement('button');
+                    rejectBtn.className = 'btn btn-danger btn-small';
+                    rejectBtn.textContent = 'Reject';
+                    rejectBtn.onclick = function() {
+                        if (confirm('Are you sure you want to reject this order?')) {
+                            console.log('❌ Reject clicked for order:', orderId);
+                            updateOrderStatus(orderId, 'rejected');
+                        }
+                    };
+                    buttonsDiv.appendChild(rejectBtn);
+                } else if (status === 'accepted') {
+                    const statusBtn = document.createElement('button');
+                    statusBtn.className = 'btn btn-secondary btn-small';
+                    statusBtn.style.cursor = 'default';
+                    statusBtn.style.opacity = '0.7';
+                    statusBtn.textContent = '✓ Order Accepted';
+                    statusBtn.disabled = true;
+                    buttonsDiv.appendChild(statusBtn);
+                } else if (status === 'rejected') {
+                    const statusBtn = document.createElement('button');
+                    statusBtn.className = 'btn btn-danger btn-small';
+                    statusBtn.style.cursor = 'default';
+                    statusBtn.style.opacity = '0.7';
+                    statusBtn.textContent = '✗ Order Rejected';
+                    statusBtn.disabled = true;
+                    buttonsDiv.appendChild(statusBtn);
+                }
+                
+                orderFooter.appendChild(totalDiv);
+                orderFooter.appendChild(buttonsDiv);
+                
+                orderCard.appendChild(orderHeader);
+                orderCard.appendChild(itemsSection);
+                orderCard.appendChild(orderFooter);
+                
+                container.appendChild(orderCard);
+            });
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            console.log('=== UPDATE ORDER STATUS ===');
+            console.log('Order ID:', orderId, 'Type:', typeof orderId);
+            console.log('New Status:', newStatus);
+            
+            try {
+                const orderIdInt = parseInt(orderId);
+                
+                if (isNaN(orderIdInt)) {
+                    throw new Error('Invalid order ID');
+                }
+                
+                console.log('Sending PUT to /api/medicine-orders/' + orderIdInt + '/status');
+                
+                const response = await fetch(`/api/medicine-orders/${orderIdInt}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', errorText);
+                    throw new Error(`Failed to update: ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Update result:', result);
+                
+                if (result.success) {
+                    console.log('✅ Order status updated successfully');
+                    
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                    await loadOrders();
+                    
+                    updateStats();
+                    renderOrders();
+                    
+                    showNotification(`✅ Order #${orderId} ${newStatus}!`, 'success');
+                } else {
+                    throw new Error('Server returned success: false');
+                }
+                
+            } catch (error) {
+                console.error('=== ERROR ===');
+                console.error(error);
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            notification.style.borderLeftColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#f59e0b';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleChatbot() {
+            const chatWindow = document.getElementById('chatbotWindow');
+            chatWindow.classList.toggle('active');
+        }
+
+        function getChatbotResponse(message) {
+            const msg = message.toLowerCase();
+            
+            if (msg.includes('add pharmacy') || msg.includes('create pharmacy') || msg.includes('new pharmacy')) {
+                return "To add a pharmacy:\n\n1. Fill in pharmacy name, address, and license number\n2. Click 'Add Location' button\n3. Choose to auto-detect or enter coordinates manually\n4. Click 'Add Pharmacy'\n\nEach pharmacy can have different locations!";
+            }
+            
+            if (msg.includes('medicine') || msg.includes('add medicine') || msg.includes('add drug')) {
+                return "To add medicines:\n\n1. Find your pharmacy in 'My Pharmacies'\n2. In the 'Add Medicine' section, enter:\n   • Medicine name\n   • Price\n   • Stock quantity\n   • Medicine type (tablet, capsule, etc.)\n3. Click 'Add'\n\nThe medicine will appear in the list below.";
+            }
+            
+            if (msg.includes('location') || msg.includes('coordinate') || msg.includes('gps')) {
+                return "Location Settings:\n\n• Click 'Add Location' when adding a pharmacy\n• Choose 'Auto-Detect' to use GPS\n• Or enter latitude/longitude manually\n• Each pharmacy can have different locations\n• Format: Latitude (-90 to 90), Longitude (-180 to 180)";
+            }
+            
+            if (msg.includes('order') || msg.includes('manage order')) {
+                return "Order Management:\n\n• View orders in 'Recent Orders' section\n• 'Pending' orders: Click 'Accept' to confirm or 'Reject' to decline\n• 'Accepted' orders: Marked as confirmed\n• Orders update in real-time\n\nYou'll see order details, items, and total amount.";
+            }
+            
+            if (msg.includes('stat') || msg.includes('revenue') || msg.includes('earning')) {
+                const stats = `Current Statistics:\n\n• Pharmacies: ${pharmacyData.pharmacies.length}\n• Medicines: ${pharmacyData.pharmacies.reduce((t, p) => t + (p.medicines?.length || 0), 0)}\n• Pending Orders: ${pharmacyData.orders.filter(o => o.status === 'pending').length}\n• Today's Revenue: ₹${pharmacyData.orders.filter(o => new Date(o.timestamp).toDateString() === new Date().toDateString() && o.status === 'accepted').reduce((t, o) => t + (o.total || 0), 0).toFixed(2)}`;
+                return stats;
+            }
+            
+            if (msg.includes('remove') || msg.includes('delete')) {
+                return "To remove items:\n\n• Medicines: Click the 'Remove' button next to the medicine\n• You'll be asked to confirm deletion\n\nNote: Currently, you cannot delete entire pharmacies. Contact support if needed.";
+            }
+            
+            if (msg.includes('help') || msg.includes('what can you do')) {
+                return "I can help you with:\n\n✅ Adding pharmacies & medicines\n✅ Managing orders\n✅ Viewing statistics\n✅ Location & GPS settings\n✅ General guidance\n\nJust ask me anything!";
+            }
+            
+            if (msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
+                return `Hi there! 👋\n\nI'm your pharmacy assistant. Currently you have:\n• ${pharmacyData.pharmacies.length} pharmacy(ies)\n• ${pharmacyData.orders.filter(o => o.status === 'pending').length} pending order(s)\n\nHow can I help you today?`;
+            }
+            
+            return `I understand you're asking about "${message}".\n\nI can help with:\n• Adding pharmacies\n• Managing medicines\n• Handling orders\n• Viewing statistics\n• Location settings\n\nCould you rephrase or choose from the suggestions above?`;
+        }
+
+        function sendChatMessage(message) {
+            const messagesContainer = document.getElementById('chatbotMessages');
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.innerHTML = `
+                <div class="chat-avatar">👤</div>
+                <div class="chat-bubble">${message}</div>
+            `;
+            messagesContainer.appendChild(userMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            setTimeout(() => {
+                const botResponse = getChatbotResponse(message);
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-message bot';
+                botMsg.innerHTML = `
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-bubble">${botResponse.replace(/\n/g, '<br>')}</div>
+                `;
+                messagesContainer.appendChild(botMsg);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 500);
+        }
+
+        function sendChatInput() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            sendChatMessage(message);
+            input.value = '';
+        }
+
+        function handleChatEnter(event) {
+            if (event.key === 'Enter') {
+                sendChatInput();
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+    </script>
+</body>
+</html>
