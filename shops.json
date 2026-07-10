@@ -1,0 +1,162 @@
+{
+  "1": {
+    "id": "1",
+    "items": [
+      {
+        "id": "1758486046059",
+        "name": "pizza",
+        "price": 120,
+        "category": "main-course",
+        "description": "yummy",
+        "image": "https://commons.wikimedia.org/wiki/File:Pizza_%281%29.jpg",
+        "availability": "available"
+      },
+      {
+        "id": "1758524959080",
+        "name": "Burger",
+        "price": 30,
+        "category": "main-course",
+        "description": "Too yummy",
+        "image": "https://commons.wikimedia.org/wiki/File:Burger_%281%29.jpg",
+        "availability": "available",
+        "added_at": "2025-09-22T12:39:19.092492"
+      },
+      {
+        "id": "1758540023022",
+        "name": "pasta",
+        "price": 300,
+        "category": "main-course",
+        "description": "white sauce ",
+        "image": "https://commons.wikimedia.org/wiki/File:Pasta_%281%29.jpg",
+        "availability": "available",
+        "added_at": "2025-09-22T16:50:23.076326"
+      },
+      {
+        "id": "1758541089168",
+        "name": "Noodles",
+        "price": 200,
+        "category": "main-course",
+        "description": "non sticky",
+        "image": "https://commons.wikimedia.org/wiki/File:Pasta_%281%29.jpg",
+        "availability": "available",
+        "added_at": "2025-09-22T17:08:09.178059"
+      },
+      {
+        "id": "1758616546441",
+        "name": "pizza",
+        "price": 120,
+        "category": "main-course",
+        "description": "yummy",
+        "image": "https://commons.wikimedia.org/wiki/File:Pasta_%281%29.jpg",
+        "availability": "available",
+        "added_at": "2025-09-23T14:05:46.454582"
+      },
+      {
+        "id": "1758622226333",
+        "name": "noodles",
+        "price": 123,
+        "category": "main-course",
+        "description": "yummy",
+        "image": "https://commons.wikimedia.org/wiki/File:Pasta_%281%29.jpg",
+        "availability": "available",
+        "added_at": "2025-09-23T15:40:26.346784"
+      }
+    ]
+  },
+  "r1760176480544": {
+    "address": "sector 22",
+    "createdAt": "2025-10-11T09:54:40.544Z",
+    "cuisine_type": "Italian",
+    "id": "r1760176480544",
+    "items": [
+      {
+        "added_at": "2025-10-11T15:25:02.032642",
+        "availability": "available",
+        "category": "main-course",
+        "id": "i1760176502018",
+        "name": "Honey Chilli Potato",
+        "price": 120
+      },
+      {
+        "added_at": "2025-10-11T21:52:07.798223",
+        "availability": "available",
+        "category": "main-course",
+        "description": "Delicious Honey Chilli potato",
+        "id": "i1760199727786",
+        "name": "Honey Chilli potato",
+        "price": 120
+      },
+      {
+        "added_at": "2025-10-11T21:53:59.185064",
+        "availability": "available",
+        "category": "main-course",
+        "id": "i1760199839167",
+        "name": "Honey Chilli potato",
+        "price": 120
+      },
+      {
+        "added_at": "2025-10-11T21:54:54.593478",
+        "availability": "available",
+        "category": "main-course",
+        "description": "Delicious Honey Chilli Potato",
+        "id": "i1760199894583",
+        "name": "Honey Chilli Potato",
+        "price": 120
+      },
+      {
+        "id": "i1760200041353",
+        "name": "Pasta",
+        "price": 120,
+        "category": "main-course",
+        "availability": "available",
+        "description": "Delicious Pasta"
+      }
+    ],
+    "latitude": 10.0,
+    "longitude": 9.0,
+    "menuItems": [
+      {
+        "id": "i1760200041353",
+        "name": "Pasta",
+        "price": 120,
+        "category": "main-course",
+        "availability": "available",
+        "description": "Delicious Pasta"
+      }
+    ],
+    "name": "Laksh's Kitchen",
+    "ownerId": "Laksh",
+    "restaurant_name": "Laksh's Kitchen"
+  },
+  "r1760345939251": {
+    "address": "Sector 22",
+    "createdAt": "2025-10-13T08:58:59.251Z",
+    "cuisine_type": "Chinese",
+    "id": "r1760345939251",
+    "items": [
+      {
+        "id": "i1760345957898",
+        "name": "Honey Chilli Potato",
+        "price": 100,
+        "category": "main-course",
+        "availability": "available",
+        "description": "Delicious Honey Chilli Potato"
+      }
+    ],
+    "latitude": 9.0,
+    "longitude": 10.0,
+    "menuItems": [
+      {
+        "id": "i1760345957898",
+        "name": "Honey Chilli Potato",
+        "price": 100,
+        "category": "main-course",
+        "availability": "available",
+        "description": "Delicious Honey Chilli Potato"
+      }
+    ],
+    "name": "Laksh's Kitchen 2",
+    "ownerId": "Laksh",
+    "restaurant_name": "Laksh's Kitchen 2"
+  }
+}

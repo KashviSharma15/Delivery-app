@@ -1,0 +1,114 @@
+{
+  "ph1761494637773": {
+    "address": "Sector 22",
+    "createdAt": "2025-10-26T16:03:57.773Z",
+    "id": "ph1761494637773",
+    "items": [
+      {
+        "description": "tablet - Paracetamol",
+        "id": "med1761494686977",
+        "name": "Paracetamol",
+        "price": 120,
+        "stock": 5,
+        "type": "tablet"
+      },
+      {
+        "id": "med1761494721366",
+        "name": "L-Cetirizine",
+        "price": 100,
+        "stock": 35,
+        "type": "tablet",
+        "description": "tablet - L-Cetirizine"
+      }
+    ],
+    "latitude": 10.1,
+    "license_number": "DL-12345",
+    "longitude": 9.1,
+    "medicines": [
+      {
+        "description": "tablet - Paracetamol",
+        "id": "med1761494686977",
+        "name": "Paracetamol",
+        "price": 120,
+        "stock": 5,
+        "type": "tablet"
+      },
+      {
+        "id": "med1761494721366",
+        "name": "L-Cetirizine",
+        "price": 100,
+        "stock": 35,
+        "type": "tablet",
+        "description": "tablet - L-Cetirizine"
+      }
+    ],
+    "name": "Apollo",
+    "owner": "Gurbaksh",
+    "ownerId": "Gurbaksh",
+    "pharmacy_name": "Apollo"
+  },
+  "ph1761563414734": {
+    "address": "Sectr 22",
+    "createdAt": "2025-10-27T11:10:14.734Z",
+    "id": "ph1761563414734",
+    "items": [
+      {
+        "description": "tablet - Paracetamol",
+        "id": "med1761563431952",
+        "name": "Paracetamol",
+        "price": 120,
+        "stock": 50,
+        "type": "tablet"
+      },
+      {
+        "description": "tablet - Cetirizine",
+        "id": "med1761563592653",
+        "name": "Cetirizine",
+        "price": 100,
+        "stock": 40,
+        "type": "tablet"
+      },
+      {
+        "id": "med1761630287282",
+        "name": "L-Cetirizine",
+        "price": 100,
+        "stock": 30,
+        "type": "tablet",
+        "description": "tablet - L-Cetirizine"
+      }
+    ],
+    "latitude": 10,
+    "license_number": "DL-11234",
+    "longitude": 9,
+    "medicines": [
+      {
+        "description": "tablet - Paracetamol",
+        "id": "med1761563431952",
+        "name": "Paracetamol",
+        "price": 120,
+        "stock": 50,
+        "type": "tablet"
+      },
+      {
+        "description": "tablet - Cetirizine",
+        "id": "med1761563592653",
+        "name": "Cetirizine",
+        "price": 100,
+        "stock": 40,
+        "type": "tablet"
+      },
+      {
+        "id": "med1761630287282",
+        "name": "L-Cetirizine",
+        "price": 100,
+        "stock": 30,
+        "type": "tablet",
+        "description": "tablet - L-Cetirizine"
+      }
+    ],
+    "name": "Pharmacy",
+    "owner": "Gurbaksh",
+    "ownerId": "Gurbaksh",
+    "pharmacy_name": "Pharmacy"
+  }
+}

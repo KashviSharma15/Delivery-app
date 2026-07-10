@@ -1,0 +1,31 @@
+[
+  {
+    "pharmacy": "Pharmacy",
+    "pharmacy_id": "ph1761563414734",
+    "customer": "Kashvi",
+    "items": [
+      {
+        "id": "med1761563431952",
+        "name": "Paracetamol",
+        "price": 120,
+        "quantity": 1
+      },
+      {
+        "id": "med1761563592653",
+        "name": "Cetirizine",
+        "price": 100,
+        "quantity": 1
+      }
+    ],
+    "total": 220,
+    "status": "completed",
+    "customerLocation": {
+      "lat": 10.01,
+      "lng": 9.01
+    },
+    "timestamp": "2025-10-28T21:24:20.529109",
+    "id": 1,
+    "order_id": 1,
+    "updated_at": "2025-10-28T23:54:43.288917"
+  }
+]
